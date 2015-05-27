@@ -1,0 +1,15 @@
+body {
+    background-color: none;
+}
+
+#mocha {
+    color: #888;
+}
+
+#mocha a {
+    color: #888;
+}
+
+#mocha a:hover {
+    color: #09f;
+}

@@ -1,0 +1,15 @@
+<dom-module id="editor-tester">
+    <link rel="import" type="css" href="tester.css">
+
+    <template>
+        <webview src="./runner.html" nodeintegration
+            on-console-message="_onRunnerConsole"
+            on-ipc-message="_onRunnerIpc"
+        ></webview>
+        <div class="reports flex-1">
+            Reporters
+        </div>
+    </template>
+</dom-module>
+
+<script type="text/javascript" src="tester.js"></script>
