@@ -2,12 +2,36 @@
     <link rel="import" type="css" href="tester.css">
 
     <template>
-        <webview src="./runner.html" nodeintegration
+        <webview src="./runner.html"
+            nodeintegration
+            autosize="on" maxheight="200"
             on-console-message="_onRunnerConsole"
             on-ipc-message="_onRunnerIpc"
         ></webview>
         <div class="reports flex-1">
-            Reporters
+            <div id="mocha">
+                <ul id="mocha-stats">
+                    <li class="passes"><a>passes:</a> <em>{{passes}}</em></li>
+                    <li class="failures"><a>failures:</a> <em>{{failures}}</em></li>
+                    <li class="duration">duration: <em>{{duration}}</em>s</li>
+                    <li class="progress">progress: <em>{{progress}}</em>%</li>
+                </ul>
+
+                <ul id="mocha-report">
+                    <template is="dom-repeat" items="{{suites}}">
+                        <li class="suite">
+                            <h2>{{item.title}}</h2>
+                            <ul>
+                                <template is="dom-repeat" items="{{item.tests}}">
+                                    <li class="test">
+                                        <h3>{{item.title}}<span class="duration">{{item.duration}}</span>ms</h3>
+                                    </li>
+                                </template>
+                            </ul>
+                        </li>
+                    </template>
+                </ul>
+            </div>
         </div>
     </template>
 </dom-module>
