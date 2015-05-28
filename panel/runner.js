@@ -1,16 +1,19 @@
 (function () {
-    var url = 'packages://console/test/console.html';
-
+    // setup mocha
     mocha.setup({
         ui: 'bdd',
     });
     mocha.setup({
         ui: 'tdd',
     });
+    mocha.reporter(require('./reporter.js'));
 
-    var reporter = require('./reporter.js');
-    mocha.reporter(reporter);
+    // setup chai
+    window.assert = chai.assert;
+    window.expect = chai.expect;
 
+    // running the test cases
+    var url = 'packages://console/test/console.html';
     Polymer.Base.importHref( url, function ( event ) {
         mocha.checkLeaks();
         mocha.run();

@@ -23,6 +23,7 @@
       "shortcuts": {
       },
       "messages": [
+          "panel:out-of-date"
       ]
     }
   }

@@ -3,7 +3,40 @@
  */
 
 var Ipc = require('ipc');
+var Mocha = require('mocha');
+
 var Base = Mocha.reporters.Base;
+
+function _ipcSuite ( suite ) {
+    return {
+        root: suite.root,
+        title: suite.title,
+        fullTitle: suite.fullTitle(),
+    };
+}
+
+function _ipcTest ( test ) {
+    var ipcTest = {
+        title: test.title,
+        fullTitle: test.fullTitle(),
+        state: test.state,
+        speed: test.speed,
+        duration: test.duration,
+        pending: test.pending,
+        fn: test.fn.toString(),
+    };
+
+    if ( test.err ) {
+        ipcTest.err = {
+            stack: test.err.stack || test.err.toString(),
+            message: test.err.message,
+            line: test.err.line,
+            sourceURL: test.err.sourceURL,
+        };
+    }
+
+    return ipcTest;
+}
 
 /**
  * Expose `IpcReporter`.
@@ -21,53 +54,40 @@ exports = module.exports = IpcReporter;
 function IpcReporter(runner) {
     Base.call(this, runner);
 
-    var self = this, stats = this.stats, n = -1;
+    var self = this, stats = this.stats;
 
     runner.on('start', function () {
         Ipc.sendToHost('runner:start');
     });
 
     runner.on('suite', function(suite){
-        // if (suite.root) return;
-
-        // // suite
-        // var url = self.suiteURL(suite);
-        // var el = fragment('<li class="suite"><h1><a href="%s">%s</a></h1></li>', url, escape(suite.title));
-
-        // // container
-        // stack[0].appendChild(el);
-        // stack.unshift(document.createElement('ul'));
-        // el.appendChild(stack[0]);
-
-        Ipc.sendToHost('runner:suite', stats, suite);
+        Ipc.sendToHost('runner:suite', _ipcSuite(suite));
     });
 
     runner.on('suite end', function (suite) {
-        // if (suite.root) return;
-        // stack.shift();
-        Ipc.sendToHost('runner:suite-end', stats, suite);
+        Ipc.sendToHost('runner:suite-end', _ipcSuite(suite));
     });
 
     runner.on('test', function(test) {
-        Ipc.sendToHost('runner:test', stats, test);
+        Ipc.sendToHost('runner:test', _ipcTest(test));
     });
 
     runner.on('pending', function (test) {
-        Ipc.sendToHost('runner:pending', test);
+        Ipc.sendToHost('runner:pending', _ipcTest(test));
     });
 
     runner.on('pass', function (test) {
-        Ipc.sendToHost('runner:pass', test);
+        Ipc.sendToHost('runner:pass', _ipcTest(test));
     });
 
     runner.on('fail', function (test, err) {
-        Ipc.sendToHost('runner:fail', test, err);
+        Ipc.sendToHost('runner:fail', _ipcTest(test), err);
     });
 
     runner.on('test end', function(test) {
         stats.duration = new Date() - stats.start;
         stats.progress = stats.tests / this.total * 100 | 0;
-        Ipc.sendToHost('runner:test-end', stats, test);
+        Ipc.sendToHost('runner:test-end', stats, _ipcTest(test));
     });
 
     runner.on('end', function () {
