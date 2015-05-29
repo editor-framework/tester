@@ -34,17 +34,17 @@ function _ipcTest ( test ) {
         speed: test.speed,
         duration: test.duration,
         pending: test.pending,
-        fn: test.fn.toString(),
+        fn: test.fn ? test.fn.toString() : '',
         err: _ipcErr(test.err)
     };
 }
 
-function _ipcStats ( reporter, stats ) {
+function _ipcStats ( runner, stats ) {
     return {
         passes: stats.passes,
         failures: stats.failures,
         duration: new Date() - stats.start,
-        progress: stats.tests / reporter.total * 100 | 0,
+        progress: stats.tests / runner.total * 100 | 0,
     };
 }
 
@@ -95,7 +95,7 @@ function IpcReporter(runner) {
     });
 
     runner.on('test end', function(test) {
-        Ipc.sendToHost('runner:test-end', _ipcStats(self,stats), _ipcTest(test));
+        Ipc.sendToHost('runner:test-end', _ipcStats(this,stats), _ipcTest(test));
     });
 
     runner.on('end', function () {

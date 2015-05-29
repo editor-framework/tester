@@ -1,4 +1,5 @@
 (function () {
+var Url = require('fire-url');
 
 function _escape(html) {
   return String(html)
@@ -85,15 +86,30 @@ Editor.registerPanel( 'tester.panel', {
 
     ready: function () {
         this.reset();
-        // this.run( 'packages://tester/test/simple.html' ); // TODO
-        this.run( 'packages://console/test/console.html' ); // TODO
-
         this._ipcListener = new Editor.IpcListener();
     },
 
-    'panel:out-of-date': function ( panelID ) {
+    'panel:open': function ( argv ) {
+        if ( !argv || !argv.tests || argv.tests.length === 0 ) {
+            this._tests = ['packages://tester/env/empty.html'];
+            this.reset();
+            this.next();
+            return;
+        }
+
+        var name = argv.name; // package name
+        var tests = argv.tests; // package name
+
+        this._tests = tests.map( function ( path ) {
+            return Url.join( 'packages://', name, path );
+        });
         this.reset();
-        this.$.runner.reload();
+        this.next();
+    },
+
+    'panel:out-of-date': function ( panelID ) {
+        // TODO: get test by panelID
+        this.reload();
     },
 
     reset: function () {
@@ -102,6 +118,8 @@ Editor.registerPanel( 'tester.panel', {
         this.duration = 0;
         this.progress = 0;
 
+        this.curTestIdx = -1;
+
         var mochaReportEL = this.$['mocha-report'];
         while ( mochaReportEL.children.length ) {
             mochaReportEL.firstChild.remove();
@@ -109,13 +127,45 @@ Editor.registerPanel( 'tester.panel', {
         this.stack = [mochaReportEL];
     },
 
-    run: function ( url ) {
-        this.$.runner.src = Editor.url(url);
+    reload: function () {
+        this.reset();
+        this.next();
+    },
+
+    next: function () {
+        this.curTestIdx += 1;
+        if ( this.curTestIdx < this._tests.length ) {
+            this._run(this._tests[this.curTestIdx]);
+        }
+    },
+
+    _run: function ( url ) {
+        if ( this.$.runner ) {
+            Polymer.dom(this.root).removeChild(this.$.runner);
+            this.$.runner = null;
+        }
+
+        var webview = document.createElement('webview');
+        webview.setAttribute( 'id', 'runner' );
+        webview.setAttribute( 'src', Editor.url(url) );
+        webview.setAttribute( 'nodeintegration', '' );
+        webview.setAttribute( 'disablewebsecurity', '' );
+        webview.setAttribute( 'autosize', 'on' );
+        webview.setAttribute( 'maxheight', '200' );
+        webview.addEventListener( 'console-message', this._onRunnerConsole.bind(this) );
+        webview.addEventListener( 'ipc-message', this._onRunnerIpc.bind(this) );
+        this.$.runner = webview;
+
+        Polymer.dom(this.root).insertBefore(this.$.runner, this.$.mocha);
     },
 
     _proxyIpc: function () {
         var args = [].slice.call(arguments, 0);
         this.$.runner.send.apply(this.$.runner,args);
+    },
+
+    _onReload: function ( event ) {
+        this.reload();
     },
 
     _onRunnerConsole: function ( event ) {
@@ -135,7 +185,7 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _onRunnerIpc: function ( event ) {
-        var stats, suite, test, err, errText, el;
+        var stats, suite, test, err, errText, el, url;
 
         switch ( event.channel ) {
         case 'tester:send':
@@ -147,7 +197,21 @@ Editor.registerPanel( 'tester.panel', {
             break;
 
         case 'runner:start':
-            // console.log('runner start');
+            // runner
+            el = _fragment('<li class="suite"><h1><a>%s</a></h1></li>',
+                           Url.basename(this.$.runner.src));
+
+            // container
+            Polymer.dom(this.stack[0]).appendChild(el);
+            this.stack.unshift(document.createElement('ul'));
+            Polymer.dom(el).appendChild(this.stack[0]);
+
+            break;
+
+        case 'runner:end':
+            console.log('%s runner finish', Url.basename(this.$.runner.src));
+            this.stack.shift();
+            this.next();
             break;
 
         case 'runner:suite':
@@ -209,7 +273,8 @@ Editor.registerPanel( 'tester.panel', {
             }
 
             // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
-            if (this.stack[0]) Polymer.dom(this.stack[0]).appendChild(el);
+            if (this.stack[0])
+                Polymer.dom(this.stack[0]).appendChild(el);
 
             break;
 
@@ -230,10 +295,6 @@ Editor.registerPanel( 'tester.panel', {
                 if (this.stack[0]) Polymer.dom(this.stack[0]).appendChild(el);
             }
 
-            break;
-
-        case 'runner:end':
-            // console.log('runner finish');
             break;
         }
     },

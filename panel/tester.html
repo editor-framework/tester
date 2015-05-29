@@ -2,7 +2,7 @@
     <link rel="import" type="css" href="tester.css">
 
     <template>
-        <webview id="runner"
+        <webview id="runner" src="../env/empty.html"
             nodeintegration
             disablewebsecurity
             autosize="on" maxheight="200"
@@ -11,6 +11,7 @@
         ></webview>
         <div id="mocha" class="layout vertical flex-1">
             <ul id="mocha-stats">
+                <li><i class="fa fa-refresh btn" on-click="_onReload"></i></li>
                 <li class="passes"><a>passes:</a> <em>{{passes}}</em></li>
                 <li class="failures"><a>failures:</a> <em>{{failures}}</em></li>
                 <li class="duration">duration: <em>{{duration}}</em>s</li>

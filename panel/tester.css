@@ -17,6 +17,17 @@ webview {
     overflow-y: auto;
 }
 
+.btn {
+    font-size: 12px;
+    padding: 3px;
+    margin-right: 0px;
+    color: #09f;
+    cursor: pointer;
+}
+.btn:hover {
+    background: #333;
+}
+
 #mocha {
     font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
     position: relative;
@@ -82,8 +93,9 @@ webview {
 }
 
 #mocha .test.pending:hover h2::after {
-    content: '(pending)';
+    content: ' [pending]';
     font-family: arial, sans-serif;
+    font-style: italic;
 }
 
 #mocha .test.pass.medium .duration {
@@ -104,6 +116,7 @@ webview {
     display: block;
     float: left;
     margin-right: 5px;
+    width: 10px;
     color: #00d6b2;
 }
 
@@ -125,7 +138,13 @@ webview {
 }
 
 #mocha .test.pending::before {
-    content: '◦';
+    content: '-';
+    font-size: 12px;
+    display: block;
+    font-size: 12px;
+    float: left;
+    margin-right: 5px;
+    width: 10px;
     color: #0b97c4;
 }
 
@@ -143,6 +162,7 @@ webview {
     display: block;
     float: left;
     margin-right: 5px;
+    width: 10px;
     color: #f00;
 }
 
@@ -239,6 +259,7 @@ webview {
 #mocha-stats {
     position: relative;
     font-size: 12px;
+    font-weight: bold;
     margin: 0;
     z-index: 1;
     height: 35px;
@@ -253,7 +274,6 @@ webview {
 }
 #mocha-stats a:hover {
     text-decoration: underline;
-    color: #09f;
     cursor: pointer;
 }
 
@@ -262,6 +282,14 @@ webview {
     margin: 0 5px;
     list-style: none;
     padding-top: 11px;
+}
+
+#mocha-stats .passes {
+    color: #090;
+}
+
+#mocha-stats .failures {
+    color: #c00;
 }
 
 #mocha code .comment { color: #ddd; }

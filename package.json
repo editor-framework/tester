@@ -19,6 +19,7 @@
       "title": "Tester",
       "width": 500,
       "height": 800,
+      "min-width": 400,
       "min-height": 400,
       "shortcuts": {
       },
@@ -26,5 +27,8 @@
           "panel:out-of-date"
       ]
     }
-  }
+  },
+  "tests": [
+      "test/all-styles.html"
+  ]
 }
