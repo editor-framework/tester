@@ -50,6 +50,32 @@ function _makeUrl(s) {
     return window.location.pathname + (search ? search + '&' : '?' ) + 'grep=' + encodeURIComponent(s);
 }
 
+function _createPassEL ( test ) {
+    return _fragment('<li class="test pass %e"><h2>%e<span class="duration">%ems</span></h2></li>',
+                     test.speed, test.title, test.duration);
+}
+
+function _createPendingEL ( test ) {
+    return _fragment('<li class="test pass pending"><h2>%e</h2></li>', test.title);
+}
+
+function _createFailEL ( test, err ) {
+    var el = _fragment('<li class="test fail"><h2>%e</h2></li>', test.title, _makeUrl(test.fullTitle));
+    var errText = err.stack;
+
+    // FF / Opera do not add the message
+    if ( !~errText.indexOf(err.message) ) {
+        errText = err.message + '\n' + errText;
+    }
+
+    // <=IE7 stringifies to [Object Error]. Since it can be overloaded, we
+    // check for the result of the stringifying.
+    if ('[object Error]' === errText) errText = err.message;
+
+    Polymer.dom(el).appendChild(_fragment('<pre class="error">%e</pre>', errText));
+    return el;
+}
+
 //
 Editor.registerPanel( 'tester.panel', {
     is: 'editor-tester',
@@ -59,6 +85,10 @@ Editor.registerPanel( 'tester.panel', {
 
     ready: function () {
         this.reset();
+        // this.run( 'packages://tester/test/simple.html' ); // TODO
+        this.run( 'packages://console/test/console.html' ); // TODO
+
+        this._ipcListener = new Editor.IpcListener();
     },
 
     'panel:out-of-date': function ( panelID ) {
@@ -79,14 +109,38 @@ Editor.registerPanel( 'tester.panel', {
         this.stack = [mochaReportEL];
     },
 
+    run: function ( url ) {
+        this.$.runner.src = Editor.url(url);
+    },
+
+    _proxyIpc: function () {
+        this.$.runner.send.apply(this.$.runner,arguments);
+    },
+
     _onRunnerConsole: function ( event ) {
-        console.log('Runner Console: ', event.message);
+        switch ( event.level ) {
+        case 0:
+            console.log('[runner-console]: ', event.message);
+            break;
+
+        case 1:
+            console.warn('[runner-console]: ', event.message);
+            break;
+
+        case 2:
+            console.error('[runner-console]: ', event.message);
+            break;
+        }
     },
 
     _onRunnerIpc: function ( event ) {
-        var stats, suite, test, err, el;
+        var stats, suite, test, err, errText, el;
 
         switch ( event.channel ) {
+        case 'tester:send':
+            this._proxyIpc.apply(this,event.args);
+            break;
+
         case 'runner:start':
             console.log('runner start');
             break;
@@ -127,24 +181,12 @@ Editor.registerPanel( 'tester.panel', {
             this.progress = stats.progress;
 
             // test
-            if ('passed' == test.state) {
-                el = _fragment('<li class="test pass %e"><h2>%e<span class="duration">%ems</span></h2></li>', test.speed, test.title, test.duration);
+            if ( test.state === 'passed' ) {
+                el = _createPassEL(test);
             } else if (test.pending) {
-                el = _fragment('<li class="test pass pending"><h2>%e</h2></li>', test.title);
+                el = _createPendingEL(test);
             } else {
-                el = _fragment('<li class="test fail"><h2>%e</h2></li>', test.title, _makeUrl(test.fullTitle));
-                var str = test.err.stack;
-
-                // FF / Opera do not add the message
-                if (!~str.indexOf(test.err.message)) {
-                    str = test.err.message + '\n' + str;
-                }
-
-                // <=IE7 stringifies to [Object Error]. Since it can be overloaded, we
-                // check for the result of the stringifying.
-                if ('[object Error]' == str) str = test.err.message;
-
-                Polymer.dom(el).appendChild(_fragment('<pre class="error">%e</pre>', str));
+                el = _createFailEL(test, test.err);
             }
 
             // toggle code
@@ -173,6 +215,14 @@ Editor.registerPanel( 'tester.panel', {
             break;
 
         case 'runner:fail':
+            test = event.args[0];
+            err = event.args[1];
+
+            el = _createFailEL(test, err);
+
+            // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
+            if (this.stack[0]) Polymer.dom(this.stack[0]).appendChild(el);
+
             break;
 
         case 'runner:end':

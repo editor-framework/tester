@@ -2,8 +2,9 @@
     <link rel="import" type="css" href="tester.css">
 
     <template>
-        <webview id="runner" src="./runner.html"
+        <webview id="runner"
             nodeintegration
+            disablewebsecurity
             autosize="on" maxheight="200"
             on-console-message="_onRunnerConsole"
             on-ipc-message="_onRunnerIpc"
