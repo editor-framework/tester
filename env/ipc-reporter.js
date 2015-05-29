@@ -27,6 +27,7 @@ function _ipcErr ( err ) {
 
 function _ipcTest ( test ) {
     return {
+        type: test.type,
         title: test.title,
         fullTitle: test.fullTitle(),
         state: test.state,

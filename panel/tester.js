@@ -114,7 +114,8 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _proxyIpc: function () {
-        this.$.runner.send.apply(this.$.runner,arguments);
+        var args = [].slice.call(arguments, 0);
+        this.$.runner.send.apply(this.$.runner,args);
     },
 
     _onRunnerConsole: function ( event ) {
@@ -138,11 +139,15 @@ Editor.registerPanel( 'tester.panel', {
 
         switch ( event.channel ) {
         case 'tester:send':
-            this._proxyIpc.apply(this,event.args);
+            // NOTE: this will prevent us send back ipc message
+            //       in ipc callstack which will make ipc event in reverse order
+            setImmediate( function () {
+                this._proxyIpc.apply(this,event.args);
+            }.bind(this));
             break;
 
         case 'runner:start':
-            console.log('runner start');
+            // console.log('runner start');
             break;
 
         case 'runner:suite':
@@ -218,15 +223,17 @@ Editor.registerPanel( 'tester.panel', {
             test = event.args[0];
             err = event.args[1];
 
-            el = _createFailEL(test, err);
+            if ( test.type === 'hook' ) {
+                el = _createFailEL(test, err);
 
-            // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
-            if (this.stack[0]) Polymer.dom(this.stack[0]).appendChild(el);
+                // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
+                if (this.stack[0]) Polymer.dom(this.stack[0]).appendChild(el);
+            }
 
             break;
 
         case 'runner:end':
-            console.log('runner finish');
+            // console.log('runner finish');
             break;
         }
     },

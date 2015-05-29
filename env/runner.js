@@ -13,6 +13,9 @@
     mocha.reporter(ipcReporter);
 
     // setup chai
+    chai.config.includeStack = true; // turn on stack trace
+    chai.config.showDiff = true;
+    chai.config.truncateThreshold = 0; // disable truncating
     window.assert = chai.assert;
     window.expect = chai.expect;
 
