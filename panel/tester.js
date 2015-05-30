@@ -159,8 +159,7 @@ Editor.registerPanel( 'tester.panel', {
 
     _run: function ( url ) {
         if ( this.$.runner ) {
-            Polymer.dom(this.root).removeChild(this.$.runner);
-            Polymer.dom.flush();
+            Polymer.dom(this.$.webviewWrapper).removeChild(this.$.runner);
             this.$.runner = null;
         }
 
@@ -175,7 +174,7 @@ Editor.registerPanel( 'tester.panel', {
         webview.addEventListener( 'ipc-message', this._onRunnerIpc.bind(this) );
         this.$.runner = webview;
 
-        Polymer.dom(this.root).insertBefore(this.$.runner, this.$.mocha);
+        Polymer.dom(this.$.webviewWrapper).appendChild(this.$.runner);
     },
 
     _proxyIpc: function () {

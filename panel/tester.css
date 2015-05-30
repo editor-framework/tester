@@ -7,6 +7,11 @@
     overflow: hidden;
 }
 
+#webviewWrapper {
+    width: 100%;
+    height: 200px;
+}
+
 webview {
     width: 100%;
     height: 200px;
