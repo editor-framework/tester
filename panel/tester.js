@@ -86,30 +86,21 @@ Editor.registerPanel( 'tester.panel', {
 
     ready: function () {
         this.reset();
-        this._ipcListener = new Editor.IpcListener();
     },
 
     'panel:open': function ( argv ) {
-        if ( !argv || !argv.tests || argv.tests.length === 0 ) {
+        if ( !argv || !argv.name ) {
             this._tests = ['packages://tester/env/empty.html'];
             this.reset();
             this.next();
             return;
         }
 
-        var name = argv.name; // package name
-        var tests = argv.tests; // package name
-
-        this._tests = tests.map( function ( path ) {
-            return Url.join( 'packages://', name, path );
-        });
-        this.reset();
-        this.next();
+        this.runTests(argv.name);
     },
 
-    'panel:out-of-date': function ( panelID ) {
-        // TODO: get test by panelID
-        this.reload();
+    'tester:run-tests': function ( pkgName ) {
+        this.runTests(pkgName);
     },
 
     reset: function () {
@@ -125,11 +116,10 @@ Editor.registerPanel( 'tester.panel', {
             mochaReportEL.firstChild.remove();
         }
         this.stack = [mochaReportEL];
-    },
 
-    reload: function () {
-        this.reset();
-        this.next();
+        if ( !this._tests || this._tests.length === 0 ) {
+            this._tests = ['packages://tester/env/empty.html'];
+        }
     },
 
     next: function () {
@@ -137,6 +127,24 @@ Editor.registerPanel( 'tester.panel', {
         if ( this.curTestIdx < this._tests.length ) {
             this._run(this._tests[this.curTestIdx]);
         }
+    },
+
+    runTests: function ( pkgName ) {
+        Editor.Package.queryInfo( pkgName, function ( result ) {
+            var pkgInfo = result.info;
+            var tests = pkgInfo.tests || [];
+            this._tests = tests.map( function ( path ) {
+                return Url.join( 'packages://', pkgInfo.name, path );
+            });
+            this.reset();
+            this.next();
+
+        }.bind(this));
+    },
+
+    reload: function () {
+        this.reset();
+        this.next();
     },
 
     _run: function ( url ) {
@@ -209,7 +217,7 @@ Editor.registerPanel( 'tester.panel', {
             break;
 
         case 'runner:end':
-            console.log('%s runner finish', Url.basename(this.$.runner.src));
+            // console.log('%s runner finish', Url.basename(this.$.runner.src));
             this.stack.shift();
             this.next();
             break;
