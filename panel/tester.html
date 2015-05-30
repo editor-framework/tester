@@ -14,7 +14,7 @@
                 <li><i class="fa fa-refresh btn" on-click="_onReload"></i></li>
                 <li class="passes"><a>passes:</a> <em>{{passes}}</em></li>
                 <li class="failures"><a>failures:</a> <em>{{failures}}</em></li>
-                <li class="duration">duration: <em>{{duration}}</em>s</li>
+                <li class="duration">duration: <em>{{_toFixed(duration,2)}}</em>s</li>
                 <li class="progress">progress: <em>{{progress}}</em>%</li>
             </ul>
 

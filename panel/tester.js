@@ -109,6 +109,11 @@ Editor.registerPanel( 'tester.panel', {
         this.duration = 0;
         this.progress = 0;
 
+        this.lastPasses = 0;
+        this.lastFailures = 0;
+        this.lastDuration = 0;
+        this.lastProgress = 0;
+
         this.curTestIdx = -1;
 
         var mochaReportEL = this.$['mocha-report'];
@@ -123,6 +128,11 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     next: function () {
+        this.lastPasses = this.passes;
+        this.lastFailures = this.failures;
+        this.lastDuration = this.duration;
+        this.lastProgress = this.progress;
+
         this.curTestIdx += 1;
         if ( this.curTestIdx < this._tests.length ) {
             this._run(this._tests[this.curTestIdx]);
@@ -150,6 +160,7 @@ Editor.registerPanel( 'tester.panel', {
     _run: function ( url ) {
         if ( this.$.runner ) {
             Polymer.dom(this.root).removeChild(this.$.runner);
+            Polymer.dom.flush();
             this.$.runner = null;
         }
 
@@ -252,10 +263,10 @@ Editor.registerPanel( 'tester.panel', {
         case 'runner:test-end':
             stats = event.args[0];
             test = event.args[1];
-            this.passes = stats.passes;
-            this.failures = stats.failures;
-            this.duration = (stats.duration / 1000).toFixed(2);
-            this.progress = stats.progress;
+            this.passes = this.lastPasses + stats.passes;
+            this.failures = this.lastFailures + stats.failures;
+            this.duration = this.lastDuration + stats.duration / 1000;
+            this.progress = this.lastProgress + stats.progress/this._tests.length;
 
             // test
             if ( test.state === 'passed' ) {
@@ -305,6 +316,10 @@ Editor.registerPanel( 'tester.panel', {
 
             break;
         }
+    },
+
+    _toFixed: function ( number, p ) {
+        return number.toFixed(p);
     },
 });
 
