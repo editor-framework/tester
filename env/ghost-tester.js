@@ -20,6 +20,26 @@
         return event;
     }
 
+    function _makeMouseEvent (type,xy,button) {
+        if (!xy) {
+            xy = {
+                x:0,
+                y:0
+            }
+        }
+
+        var props = {
+            bubbles: true,
+            cancelable: true,
+            clientX: xy.x,
+            clientY: xy.y,
+            button: button ? button: 0
+        };
+
+        var event = new MouseEvent(type,props);
+        return event;
+    }
+
     var Tester = {
         send: function ( channel ) {
             if ( !channel ) {
@@ -58,6 +78,31 @@
         keyUpOn: function ( target, keyText, modifier ) {
             target.dispatchEvent(_keyboardEventFor('keyup', Editor.KeyCode(keyText), modifier));
         },
+
+        keypress: function (target, keyText) {
+            target.dispatchEvent(_keyboardEventFor('keypress', Editor.KeyCode(keyText)));
+        },
+
+        mouseEvent: function (target, type,xy,button) {
+            target.dispatchEvent(_makeMouseEvent(type,xy,button));
+        },
+
+        topLeftOfNode: function(target) {
+            var bcr = target.getBoundingClientRect();
+            return {
+              y: bcr.top,
+              x: bcr.left
+            };
+        },
+
+        middleOfNode: function (target) {
+            var bcr = target.getBoundingClientRect();
+            return {
+              y: bcr.top + (bcr.height / 2),
+              x: bcr.left + (bcr.width / 2)
+            };
+        },
+
     };
 
     Object.defineProperty( Tester, 'needCheckLeaks', {
