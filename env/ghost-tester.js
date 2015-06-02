@@ -20,19 +20,12 @@
         return event;
     }
 
-    function _makeMouseEvent (type,xy,button) {
-        if (!xy) {
-            xy = {
-                x:0,
-                y:0
-            }
-        }
-
+    function _makeMouseEvent (type,x,y,button) {
         var props = {
             bubbles: true,
             cancelable: true,
-            clientX: xy.x,
-            clientY: xy.y,
+            clientX: x,
+            clientY: y,
             button: button ? button: 0
         };
 
@@ -83,8 +76,8 @@
             target.dispatchEvent(_keyboardEventFor('keypress', Editor.KeyCode(keyText)));
         },
 
-        mouseEvent: function (target, type,xy,button) {
-            target.dispatchEvent(_makeMouseEvent(type,xy,button));
+        mouseEvent: function (target, type, x, y, button) {
+            target.dispatchEvent(_makeMouseEvent(type, x, y, button));
         },
 
         topLeftOfNode: function(target) {
