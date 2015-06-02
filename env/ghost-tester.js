@@ -20,6 +20,26 @@
         return event;
     }
 
+    function _makeMouseEvent (type,x,y,button) {
+        var props = {
+            bubbles: true,
+            cancelable: true,
+            clientX: x,
+            clientY: y,
+            button: button ? button: 0
+        };
+
+        var event = new MouseEvent(type,props);
+        return event;
+    }
+
+    function flushAsynchronousOperations() {
+        // force distribution
+        Polymer.dom.flush();
+        // force lifecycle callback to fire on polyfill
+        window.CustomElements && window.CustomElements.takeRecords();
+    }
+
     var Tester = {
         send: function ( channel ) {
             if ( !channel ) {
@@ -58,6 +78,51 @@
         keyUpOn: function ( target, keyText, modifier ) {
             target.dispatchEvent(_keyboardEventFor('keyup', Editor.KeyCode(keyText), modifier));
         },
+
+        keypress: function (target, keyText) {
+            target.dispatchEvent(_keyboardEventFor('keypress', Editor.KeyCode(keyText)));
+        },
+
+        mouseEvent: function (target, type, x, y, button) {
+            target.dispatchEvent(_makeMouseEvent(type, x, y, button));
+        },
+
+        topLeftOfNode: function(target) {
+            var bcr = target.getBoundingClientRect();
+            return {
+              y: bcr.top,
+              x: bcr.left
+            };
+        },
+
+        fireEvent: function(target, type, props) {
+            var event = new CustomEvent(type, {
+                bubbles: true,
+                cancelable: true
+            });
+            for (p in props) {
+                event[p] = props[p];
+            }
+            target.dispatchEvent(event);
+        },
+
+        forceXIfStamp: function (target) {
+            var templates = Polymer.dom(target.root).querySelectorAll('template[is=dom-if]');
+                for (var tmpl, i = 0; tmpl = templates[i]; i++) {
+                  tmpl.render();
+                }
+
+            flushAsynchronousOperations();
+        },
+
+        middleOfNode: function (target) {
+            var bcr = target.getBoundingClientRect();
+            return {
+              y: bcr.top + (bcr.height / 2),
+              x: bcr.left + (bcr.width / 2)
+            };
+        },
+
     };
 
     Object.defineProperty( Tester, 'needCheckLeaks', {
