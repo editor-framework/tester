@@ -33,6 +33,13 @@
         return event;
     }
 
+    function flushAsynchronousOperations() {
+        // force distribution
+        Polymer.dom.flush();
+        // force lifecycle callback to fire on polyfill
+        window.CustomElements && window.CustomElements.takeRecords();
+    }
+
     var Tester = {
         send: function ( channel ) {
             if ( !channel ) {
@@ -86,6 +93,26 @@
               y: bcr.top,
               x: bcr.left
             };
+        },
+
+        fireEvent: function(target, type, props) {
+            var event = new CustomEvent(type, {
+                bubbles: true,
+                cancelable: true
+            });
+            for (p in props) {
+                event[p] = props[p];
+            }
+            target.dispatchEvent(event);
+        },
+
+        forceXIfStamp: function (target) {
+            var templates = Polymer.dom(target.root).querySelectorAll('template[is=dom-if]');
+                for (var tmpl, i = 0; tmpl = templates[i]; i++) {
+                  tmpl.render();
+                }
+
+            flushAsynchronousOperations();
         },
 
         middleOfNode: function (target) {
