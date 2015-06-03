@@ -7,8 +7,7 @@
         ui: 'tdd',
     });
 
-    var ipcReporter = Editor.require('packages://tester/env/ipc-reporter');
-    mocha.reporter(ipcReporter);
+    mocha.reporter(IpcReporter);
 
     // setup chai
     chai.config.includeStack = true; // turn on stack trace
