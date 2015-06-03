@@ -1,0 +1,128 @@
+<html>
+    <head>
+        <title>ghost-tester tests</title>
+        <meta charset="utf-8">
+        <link rel="import" href="packages://tester/env/env-widget.html">
+    </head>
+
+    <body>
+        <widget-fixture id="play-ground">
+            <template>
+                <div class="layout fit"></div>
+            </template>
+        </widget-fixture>
+
+        <script>
+            describe('Test ghost-tester', function() {
+                var testEl;
+
+                beforeEach(function () {
+                    testEl = fixture('play-ground');
+                });
+
+                this.timeout(50);
+
+                it('should respond keydown "a"', function( done ) {
+                    testEl.addEventListener( 'keydown', function ( event ) {
+                        if ( event.keyCode === Editor.KeyCode('a') ) {
+                            done();
+                        }
+                    });
+
+                    Tester.keydown( testEl, 'a');
+                });
+
+                it('should respond "command + t"', function( done ) {
+                    testEl.addEventListener( 'keydown', function ( event ) {
+                        if ( event.metaKey &&
+                             event.keyCode === Editor.KeyCode('t') )
+                        {
+                            done();
+                        }
+                    });
+                    Tester.keydown( testEl, 't', 'command' );
+                });
+
+                it('should respond keyup "b"', function( done ) {
+                    testEl.addEventListener( 'keyup', function ( event ) {
+                        if ( event.keyCode === Editor.KeyCode('b') ) {
+                            done();
+                        }
+                    });
+                    Tester.keyup( testEl, 'b');
+                });
+
+                it('should respond click', function( done ) {
+                    testEl.addEventListener( 'click', function ( event ) {
+                        done();
+                    });
+
+                    Tester.click( testEl );
+                });
+
+                it('should respond mousedown on right button', function( done ) {
+                    testEl.addEventListener( 'mousedown', function ( event ) {
+                        if ( event.which === 2 ) {
+                            done();
+                        }
+                    });
+
+                    Tester.mousedown( testEl, null, null, 2 );
+                });
+
+                it('should respond mouseup on left button', function( done ) {
+                    testEl.addEventListener( 'mouseup', function ( event ) {
+                        if ( event.which === 1 ) {
+                            done();
+                        }
+                    });
+
+                    Tester.mouseup( testEl, null, null, 1 );
+                });
+
+                it('should respond dblclick on left button', function( done ) {
+                    testEl.addEventListener( 'dblclick', function ( event ) {
+                        if ( event.which === 1 ) {
+                            done();
+                        }
+                    });
+
+                    Tester.dblclick( testEl, null, null, 1 );
+                });
+
+                it('should respond mousewheel', function( done ) {
+                    testEl.addEventListener( 'mousewheel', function ( event ) {
+                        if ( event.deltaY === 0.5 ) {
+                            done();
+                        }
+                    });
+
+                    Tester.mousewheel( testEl, null, null, 0.5 );
+                });
+
+                it('should respond mousemove', function( done ) {
+                    var results = [
+                        { x: 0, y: 0 },
+                        { x: 20, y: 20 },
+                        { x: 40, y: 40 },
+                        { x: 60, y: 60 },
+                        { x: 80, y: 80 },
+                        { x: 100, y: 100 },
+                    ]
+                    var idx = 0;
+                    testEl.addEventListener( 'mousemove', function ( event ) {
+                        expect( event.clientX ).to.equal(results[idx].x);
+                        expect( event.clientY ).to.equal(results[idx].y);
+                        idx += 1;
+
+                        if ( idx >= results.length ) {
+                            done();
+                            return;
+                        }
+                    });
+                    Tester.mousemove( testEl, { x: 0, y: 0 }, { x: 100, y: 100 }, 1, 5 );
+                });
+            });
+        </script>
+    </body>
+</html>

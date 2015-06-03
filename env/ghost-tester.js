@@ -20,24 +20,17 @@
         return event;
     }
 
-    function _makeMouseEvent (type,x,y,button) {
+    function _mouseEventFor ( type, x, y, button ) {
         var props = {
             bubbles: true,
             cancelable: true,
             clientX: x,
             clientY: y,
-            button: button ? button: 0
+            button: button ? button-1 : -1,
         };
 
         var event = new MouseEvent(type,props);
         return event;
-    }
-
-    function flushAsynchronousOperations() {
-        // force distribution
-        Polymer.dom.flush();
-        // force lifecycle callback to fire on polyfill
-        window.CustomElements && window.CustomElements.takeRecords();
     }
 
     var Tester = {
@@ -63,6 +56,10 @@
             });
         },
 
+        // ===================
+        // general focus events
+        // ===================
+
         focus: function ( target ) {
             Polymer.Base.fire.call(target, 'focus');
         },
@@ -71,11 +68,15 @@
             Polymer.Base.fire.call(target, 'blur');
         },
 
-        keyDownOn: function ( target, keyText, modifier ) {
+        // ===================
+        // general keyboard events
+        // ===================
+
+        keydown: function ( target, keyText, modifier ) {
             target.dispatchEvent(_keyboardEventFor('keydown', Editor.KeyCode(keyText), modifier));
         },
 
-        keyUpOn: function ( target, keyText, modifier ) {
+        keyup: function ( target, keyText, modifier ) {
             target.dispatchEvent(_keyboardEventFor('keyup', Editor.KeyCode(keyText), modifier));
         },
 
@@ -83,16 +84,121 @@
             target.dispatchEvent(_keyboardEventFor('keypress', Editor.KeyCode(keyText)));
         },
 
-        mouseEvent: function (target, type, x, y, button) {
-            target.dispatchEvent(_makeMouseEvent(type, x, y, button));
+        // ===================
+        // general mouse events
+        // ===================
+
+        click: function ( target, x, y, button ) {
+            var pos = { x: x, y: y };
+            if ( typeof x !== 'number' || typeof y !== 'number' )
+                pos = this.middleOfNode(target);
+
+            Tester.mousedown(target, pos.x, pos.y);
+            Tester.mouseup(target, pos.x, pos.y);
+
+            target.dispatchEvent(_mouseEventFor('click', pos.x, pos.y, button ));
         },
 
-        topLeftOfNode: function(target) {
-            var bcr = target.getBoundingClientRect();
-            return {
-              y: bcr.top,
-              x: bcr.left
+        dblclick: function ( target, x, y, button ) {
+            var pos = { x: x, y: y };
+            if ( typeof x !== 'number' || typeof y !== 'number' )
+                pos = this.middleOfNode(target);
+
+            target.dispatchEvent(_mouseEventFor('dblclick', pos.x, pos.y, button ));
+        },
+
+        mousedown: function ( target, x, y, button ) {
+            var pos = { x: x, y: y };
+            if ( typeof x !== 'number' || typeof y !== 'number' )
+                pos = this.middleOfNode(target);
+
+            target.dispatchEvent(_mouseEventFor('mousedown', pos.x, pos.y, button ));
+        },
+
+        mouseup: function ( target, x, y, button ) {
+            var pos = { x: x, y: y };
+            if ( typeof x !== 'number' || typeof y !== 'number' )
+                pos = this.middleOfNode(target);
+
+            target.dispatchEvent(_mouseEventFor('mouseup', pos.x, pos.y, button ));
+        },
+
+        mousewheel: function ( target, x, y, delta ) {
+            var pos = { x: x, y: y };
+            if ( typeof x !== 'number' || typeof y !== 'number' )
+                pos = this.middleOfNode(target);
+
+            target.dispatchEvent(new WheelEvent('mousewheel',{
+                bubbles: true,
+                cancelable: true,
+                clientX: x,
+                clientY: y,
+                deltaY: delta,
+            }));
+        },
+
+        mousemove: function ( target, from, to, button, steps ) {
+            steps = steps || 5;
+            var dx = Math.round((to.x - from.x) / steps);
+            var dy = Math.round((to.y - from.y) / steps);
+            var pos = {
+                x: from.x,
+                y: from.y
             };
+            for ( var i = steps; i > 0; i-- ) {
+                target.dispatchEvent(_mouseEventFor('mousemove', pos.x, pos.y, button ));
+                pos.x += dx;
+                pos.y += dy;
+            }
+            target.dispatchEvent(_mouseEventFor('mousemove', to.x, to.y, button ));
+        },
+
+        // ===================
+        // special events
+        // ===================
+
+        mousetrack: function ( target, from, to, steps ) {
+            Tester.mousedown(target, from.x, from.y, 1);
+            Tester.mousemove(target, from, to, 1, steps);
+            Tester.mouseup(target, to.x, to.y, 1);
+        },
+
+        pressAndReleaseKeyOn: function ( target, keyCode ) {
+            Tester.keydown(target, keyCode);
+            Polymer.Base.async(function() {
+                Tester.keyup(target, keyCode);
+            }, 1);
+        },
+
+        pressEnter: function (target) {
+            Tester.pressAndReleaseKeyOn(target, 13);
+        },
+
+        pressSpace: function (target) {
+            Tester.pressAndReleaseKeyOn(target, 32);
+        },
+
+        // ===================
+        // helpers
+        // ===================
+
+        flushAsyncOperations: function () {
+            // force distribution
+            Polymer.dom.flush();
+
+            // force lifecycle callback to fire on polyfill
+            if ( window.CustomElements )
+                window.CustomElements.takeRecords();
+        },
+
+        forceXIfStamp: function (target) {
+            var templates = Polymer.dom(target.root).querySelectorAll('template[is=dom-if]');
+            for ( var i = 0; i < templates.length; ++i ) {
+                var tmpl = templates[i];
+                tmpl.render();
+            }
+
+            Tester.flushAsyncOperations();
         },
 
         fireEvent: function(target, type, props) {
@@ -100,19 +206,10 @@
                 bubbles: true,
                 cancelable: true
             });
-            for (p in props) {
+            for ( var p in props ) {
                 event[p] = props[p];
             }
             target.dispatchEvent(event);
-        },
-
-        forceXIfStamp: function (target) {
-            var templates = Polymer.dom(target.root).querySelectorAll('template[is=dom-if]');
-                for (var tmpl, i = 0; tmpl = templates[i]; i++) {
-                  tmpl.render();
-                }
-
-            flushAsynchronousOperations();
         },
 
         middleOfNode: function (target) {
@@ -123,6 +220,13 @@
             };
         },
 
+        topLeftOfNode: function(target) {
+            var bcr = target.getBoundingClientRect();
+            return {
+              y: bcr.top,
+              x: bcr.left
+            };
+        },
     };
 
     Object.defineProperty( Tester, 'needCheckLeaks', {

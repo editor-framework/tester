@@ -144,6 +144,9 @@ Editor.registerPanel( 'tester.panel', {
             var pkgInfo = result.info;
             var tests = pkgInfo.tests || [];
             this._tests = tests.map( function ( path ) {
+                if ( pkgInfo.build )
+                    return Url.join( 'packages://', pkgInfo.name, 'bin', 'dev', path );
+
                 return Url.join( 'packages://', pkgInfo.name, path );
             });
             this.reset();
