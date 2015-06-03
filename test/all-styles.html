@@ -37,6 +37,12 @@
                 it('css .test.pending');
                 it.skip('css .test.pending skip', function () {
                 });
+
+                it('a long looooooooong loooooooooooooooong loooooooooooooooooooog text', function (done) {
+                    setTimeout( function () {
+                        done();
+                    }, 50);
+                });
             });
         </script>
     </body>
