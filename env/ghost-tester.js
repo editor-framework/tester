@@ -163,19 +163,19 @@
             Tester.mouseup(target, to.x, to.y, 1);
         },
 
-        pressAndReleaseKeyOn: function ( target, keyCode ) {
-            Tester.keydown(target, keyCode);
+        pressAndReleaseKeyOn: function ( target, keyText ) {
+            Tester.keydown(target, keyText);
             Polymer.Base.async(function() {
-                Tester.keyup(target, keyCode);
+                Tester.keyup(target, keyText);
             }, 1);
         },
 
         pressEnter: function (target) {
-            Tester.pressAndReleaseKeyOn(target, 13);
+            Tester.pressAndReleaseKeyOn(target, 'enter');
         },
 
         pressSpace: function (target) {
-            Tester.pressAndReleaseKeyOn(target, 32);
+            Tester.pressAndReleaseKeyOn(target, 'space');
         },
 
         // ===================
