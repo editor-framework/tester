@@ -161,7 +161,12 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _run: function ( url ) {
+        // NOTE: The reason I don't use this.$.runner.src directly is because it will not stop
+        //       the current running tests, even if I call runner.stop(). So destroy the webview is
+        //       and recreate it is better than give him a source.
         if ( this.$.runner ) {
+            this.$.runner.stop();
+            this.$.runner.clearHistory();
             Polymer.dom(this.$.webviewWrapper).removeChild(this.$.runner);
             this.$.runner = null;
         }
