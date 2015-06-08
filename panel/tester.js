@@ -171,18 +171,20 @@ Editor.registerPanel( 'tester.panel', {
             this.$.runner = null;
         }
 
-        var webview = document.createElement('webview');
-        webview.setAttribute( 'id', 'runner' );
-        webview.setAttribute( 'src', Editor.url(url) );
-        webview.setAttribute( 'nodeintegration', '' );
-        webview.setAttribute( 'disablewebsecurity', '' );
-        webview.setAttribute( 'autosize', 'on' );
-        webview.setAttribute( 'maxheight', '200' );
-        webview.addEventListener( 'console-message', this._onRunnerConsole.bind(this) );
-        webview.addEventListener( 'ipc-message', this._onRunnerIpc.bind(this) );
-        this.$.runner = webview;
+        this.async( function () {
+            var webview = document.createElement('webview');
+            webview.setAttribute( 'id', 'runner' );
+            webview.setAttribute( 'src', Editor.url(url) );
+            webview.setAttribute( 'nodeintegration', '' );
+            webview.setAttribute( 'disablewebsecurity', '' );
+            webview.setAttribute( 'autosize', 'on' );
+            webview.setAttribute( 'maxheight', '200' );
+            webview.addEventListener( 'console-message', this._onRunnerConsole.bind(this) );
+            webview.addEventListener( 'ipc-message', this._onRunnerIpc.bind(this) );
+            this.$.runner = webview;
 
-        Polymer.dom(this.$.webviewWrapper).appendChild(this.$.runner);
+            Polymer.dom(this.$.webviewWrapper).appendChild(this.$.runner);
+        }.bind(this));
     },
 
     _proxyIpc: function () {

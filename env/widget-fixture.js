@@ -149,19 +149,18 @@
                         document.getElementById(fixtureId).restore();
                     });
 
+                    var el;
                     if ( typeof modelOrFn === 'function' ) {
-                        document.getElementById(fixtureId).create();
-                        modelOrFn();
+                        el = document.getElementById(fixtureId).create();
+                        modelOrFn(el);
                         return;
                     }
 
                     if ( typeof done === 'function' ) {
-                        document.getElementById(fixtureId).create(modelOrFn);
-                        done();
+                        el = document.getElementById(fixtureId).create(modelOrFn);
+                        done(el);
                         return;
                     }
-
-                    return document.getElementById(fixtureId).create(modelOrFn);
                 };
             });
         };

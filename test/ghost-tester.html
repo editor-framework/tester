@@ -16,8 +16,11 @@
             describe('Test ghost-tester', function() {
                 var testEl;
 
-                beforeEach(function () {
-                    testEl = fixture('play-ground');
+                beforeEach(function (done) {
+                    fixture('play-ground', function (el) {
+                         testEl = el;
+                         done();
+                    });
                 });
 
                 this.timeout(50);
