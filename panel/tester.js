@@ -139,7 +139,42 @@ Editor.registerPanel( 'tester.panel', {
         }
     },
 
+    resetRunner: function () {
+        // NOTE: The reason I don't use this.$.runner.src directly is because it will not stop
+        //       the current running tests, even if I call runner.stop(). So destroy the webview is
+        //       and recreate it is better than give him a source.
+        if ( this.$.runner ) {
+            Polymer.dom(this.$.webviewWrapper).removeChild(this.$.runner);
+            this.$.runner = null;
+        }
+
+        var webview = document.createElement('webview');
+        webview.setAttribute( 'id', 'runner' );
+        // webview.setAttribute( 'src', Editor.url(url) );
+        webview.setAttribute( 'nodeintegration', '' );
+        webview.setAttribute( 'disablewebsecurity', '' );
+        webview.setAttribute( 'autosize', 'on' );
+        webview.setAttribute( 'maxheight', '200' );
+        webview.addEventListener( 'console-message', this._onRunnerConsole.bind(this) );
+        webview.addEventListener( 'ipc-message', this._onRunnerIpc.bind(this) );
+        webview.addEventListener( 'crashed', function ( event ) {
+            console.error( 'webview crashed!' );
+        });
+        webview.addEventListener( 'gpu-crashed', function ( event ) {
+            console.error( 'webview gpu-crashed!' );
+        });
+        webview.addEventListener( 'plugin-crashed', function ( event ) {
+            console.error( 'webview plugin-crashed!' );
+        });
+        this.$.runner = webview;
+
+        Polymer.dom(this.$.webviewWrapper).appendChild(this.$.runner);
+    },
+
     runTests: function ( pkgName ) {
+        this.resetRunner();
+
+        //
         Editor.Package.queryInfo( pkgName, function ( result ) {
             var pkgInfo = result.info;
             var tests = pkgInfo.tests || [];
@@ -161,30 +196,9 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _run: function ( url ) {
-        // NOTE: The reason I don't use this.$.runner.src directly is because it will not stop
-        //       the current running tests, even if I call runner.stop(). So destroy the webview is
-        //       and recreate it is better than give him a source.
         if ( this.$.runner ) {
-            this.$.runner.stop();
-            this.$.runner.clearHistory();
-            Polymer.dom(this.$.webviewWrapper).removeChild(this.$.runner);
-            this.$.runner = null;
+            this.$.runner.src = Editor.url(url);
         }
-
-        this.async( function () {
-            var webview = document.createElement('webview');
-            webview.setAttribute( 'id', 'runner' );
-            webview.setAttribute( 'src', Editor.url(url) );
-            webview.setAttribute( 'nodeintegration', '' );
-            webview.setAttribute( 'disablewebsecurity', '' );
-            webview.setAttribute( 'autosize', 'on' );
-            webview.setAttribute( 'maxheight', '200' );
-            webview.addEventListener( 'console-message', this._onRunnerConsole.bind(this) );
-            webview.addEventListener( 'ipc-message', this._onRunnerIpc.bind(this) );
-            this.$.runner = webview;
-
-            Polymer.dom(this.$.webviewWrapper).appendChild(this.$.runner);
-        }.bind(this));
     },
 
     _proxyIpc: function () {
@@ -213,6 +227,9 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _onRunnerIpc: function ( event ) {
+        if ( this._preparing )
+            return;
+
         var stats, suite, test, err, errText, el, url;
 
         switch ( event.channel ) {
