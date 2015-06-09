@@ -3,9 +3,6 @@
     mocha.setup({
         ui: 'bdd',
     });
-    mocha.setup({
-        ui: 'tdd',
-    });
 
     mocha.reporter(IpcReporter);
 
