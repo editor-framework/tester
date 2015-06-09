@@ -7,6 +7,7 @@
 
         event.keyCode = keyCode;
         event.code = keyCode;
+        event.which = keyCode;
 
         if ( modifier === 'shift')
             event.shiftKey = true;
