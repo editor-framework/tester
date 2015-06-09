@@ -4,30 +4,50 @@
         _fixtureTemplate: null,
 
         create: function ( done ) {
+            this._fixtureTemplate = this.querySelector('template');
+
             var url = this.getAttribute('src');
+            var self = this;
 
-            Polymer.Base.importHref( url, function ( event ) {
-                this._fixtureTemplate = this.querySelector('template');
-                if ( !this._fixtureTemplate || this._fixtureTemplate.tagName !== 'TEMPLATE' ) {
-                    done ();
-                    return;
-                }
+            if ( url ) {
+                Polymer.Base.importHref( url, function ( event ) {
+                    self.createFrom( self._fixtureTemplate, function ( el ) {
+                        if ( el ) {
+                            self.appendChild(el);
+                        }
+                        done(el);
+                    });
+                }, function ( err ) {
+                    Editor.error( 'Failed to load %s. message: %s', url, err.message );
+                    done();
+                });
+            }
+            else {
+                self.createFrom( self._fixtureTemplate, function ( el ) {
+                    if ( el ) {
+                        self.appendChild(el);
+                    }
+                    done(el);
+                });
+            }
+        },
 
-                var fixturedFragment = document.importNode(this._fixtureTemplate.content, true);
-                // Immediately upgrade the subtree if we are dealing with async
-                // Web Components polyfill.
-                // https://github.com/Polymer/polymer/blob/0.8-preview/src/features/mini/template.html#L52
-                if (window.CustomElements && CustomElements.upgradeSubtree) {
-                    CustomElements.upgradeSubtree(fixturedFragment);
-                }
+        createFrom: function ( template, done ) {
+            if ( !template || template.tagName !== 'TEMPLATE' ) {
+                done ();
+                return;
+            }
 
-                var el = fixturedFragment.firstElementChild;
-                this.appendChild(el);
-                done(el);
-            }.bind(this), function ( err ) {
-                Editor.error( 'Failed to load %s. message: %s', url, err.message );
-                done();
-            });
+            var fixturedFragment = document.importNode(template.content, true);
+            // Immediately upgrade the subtree if we are dealing with async
+            // Web Components polyfill.
+            // https://github.com/Polymer/polymer/blob/0.8-preview/src/features/mini/template.html#L52
+            if (window.CustomElements && CustomElements.upgradeSubtree) {
+                CustomElements.upgradeSubtree(fixturedFragment);
+            }
+
+            var el = fixturedFragment.firstElementChild;
+            done(el);
         },
 
         restore: function () {
