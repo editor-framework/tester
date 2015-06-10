@@ -12,6 +12,7 @@
     chai.config.truncateThreshold = 0; // disable truncating
     window.assert = chai.assert;
     window.expect = chai.expect;
+    window.sinon = require('sinon');
 
     var frameworkReady = false;
 

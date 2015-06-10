@@ -62,10 +62,18 @@
         // ===================
 
         focus: function ( target ) {
+            if ( target.setFocus ) {
+                target.setFocus();
+                return;
+            }
             Polymer.Base.fire.call(target, 'focus');
         },
 
         blur: function ( target ) {
+            if ( target.setBlur ) {
+                target.setBlur();
+                return;
+            }
             Polymer.Base.fire.call(target, 'blur');
         },
 
