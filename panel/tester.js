@@ -172,8 +172,6 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     runTests: function ( pkgName ) {
-        this.resetRunner();
-
         //
         Editor.Package.queryInfo( pkgName, function ( result ) {
             var pkgInfo = result.info;
@@ -196,6 +194,7 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _run: function ( url ) {
+        this.resetRunner();
         if ( this.$.runner ) {
             this.$.runner.src = Editor.url(url);
         }
