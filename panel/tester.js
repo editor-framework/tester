@@ -182,6 +182,8 @@ Editor.registerPanel( 'tester.panel', {
 
                 return Url.join( 'packages://', pkgInfo.name, path );
             });
+            // always turn to empty at the end
+            this._tests.push('packages://tester/env/empty.html');
             this.reset();
             this.next();
 
