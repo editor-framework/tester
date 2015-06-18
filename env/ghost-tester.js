@@ -46,13 +46,18 @@
 
         checkLeaks: function ( enabled ) {
             _checkLeaks = enabled;
+            if ( !enabled ) {
+                console.warn( 'You have disabled the global leak check!' );
+            }
         },
 
         // https://github.com/mochajs/mocha/wiki/Detecting-global-leaks
         detectLeak: function ( name_of_leaking_property ) {
             Object.defineProperty(global, name_of_leaking_property, {
                 set : function(value) {
-                    throw new Error('Global leak happends here!!');
+                    var err = new Error('Global leak happends here!!');
+                    console.log(err.stack);
+                    throw err;
                 }
             });
         },

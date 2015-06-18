@@ -22,7 +22,12 @@
             if ( Tester.needCheckLeaks ) {
                 mocha.checkLeaks();
             }
-            mocha.globals(['Editor','Polymer']);
+            mocha.globals([
+                'Editor',
+                'panels',
+                'widgets',
+                'Polymer',
+            ]);
             mocha.run();
         }
     }
