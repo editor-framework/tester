@@ -1,5 +1,6 @@
 (function () {
 var Url = require('fire-url');
+var Fs = require('fire-fs');
 
 function _escape(html) {
   return String(html)
@@ -199,7 +200,12 @@ Editor.registerPanel( 'tester.panel', {
     _run: function ( url ) {
         this.resetRunner();
         if ( this.$.runner ) {
-            this.$.runner.src = Editor.url(url);
+            var src = Editor.url(url);
+            if ( Fs.existsSync(src) ) {
+                this.$.runner.src = src;
+            } else {
+                this.$.runner.src = Editor.url('packages://tester/env/empty.html');
+            }
         }
     },
 
