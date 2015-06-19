@@ -5,6 +5,7 @@
     flex-direction: column;
 
     overflow: hidden;
+    white-space: nowrap;
 }
 
 #webviewWrapper {
@@ -272,7 +273,6 @@ webview {
     z-index: 1;
     height: 35px;
     min-height: 35px;
-    white-space: nowrap;
 
     color: #888;
     border-bottom: 1px solid #888;
