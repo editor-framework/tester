@@ -24,8 +24,6 @@
             }
             mocha.globals([
                 'Editor',
-                'panels',
-                'widgets',
                 'Polymer',
             ]);
             mocha.run();
