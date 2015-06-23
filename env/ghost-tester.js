@@ -35,13 +35,15 @@
     }
 
     var Tester = {
-        send: function ( channel ) {
-            if ( !channel ) {
-                throw new Error('Please specific a channel for your message');
-            }
-            var args = [].slice.call( arguments, 0 );
-            args.unshift('tester:send');
-            Ipc.sendToHost.apply(null,args);
+        FakeCore: {
+            send: function ( channel ) {
+                if ( !channel ) {
+                    throw new Error('Please specific a channel for your message');
+                }
+                var args = [].slice.call( arguments, 0 );
+                args.unshift('tester:send');
+                Ipc.sendToHost.apply(null,args);
+            },
         },
 
         checkLeaks: function ( enabled ) {
