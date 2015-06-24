@@ -1,6 +1,7 @@
 (function () {
 var Url = require('fire-url');
 var Fs = require('fire-fs');
+var Path = require('fire-path');
 
 function _escape(html) {
   return String(html)
@@ -202,9 +203,18 @@ Editor.registerPanel( 'tester.panel', {
         if ( this.$.runner ) {
             var src = Editor.url(url);
             if ( Fs.existsSync(src) ) {
-                this.$.runner.src = src;
+                var extname = Path.extname(src);
+                if ( extname === '.html' ) {
+                    this.$.runner.src = src;
+                }
+                else if ( extname === '.js') {
+                    this.$.runner.src = Editor.url('packages://tester/env/env-core.html');
+                    Editor.sendToCore( 'tester:run-test', src );
+                }
+                this.$.runner.title = Path.basename(src);
             } else {
                 this.$.runner.src = Editor.url('packages://tester/env/empty.html');
+                this.$.runner.title = Path.basename(this.$.runner.src);
             }
         }
     },
@@ -242,9 +252,6 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _onRunnerIpc: function ( event ) {
-        if ( this._preparing )
-            return;
-
         var stats, suite, test, err, errText, el, url;
 
         switch ( event.channel ) {
@@ -254,115 +261,105 @@ Editor.registerPanel( 'tester.panel', {
             setImmediate( function () {
                 this._proxyIpc.apply(this,event.args);
             }.bind(this));
+
             break;
 
-        case 'runner:start':
-            // runner
-            el = _fragment('<li class="suite"><h1><a>%s</a></h1></li>',
-                           Url.basename(this.$.runner.src));
+        case 'runner:start': this._onRunnerStart(); break;
+        case 'runner:end': this._onRunnerEnd(); break;
+        case 'runner:suite': this._onRunnerSuite( event.args[0] ); break;
+        case 'runner:suite-end': this._onRunnerSuiteEnd( event.args[0] ); break;
+        case 'runner:test': break;
+        case 'runner:test-end': this._onRunnerTestEnd( event.args[0],  event.args[1] ); break;
+        case 'runner:pending': break;
+        case 'runner:pass': break;
+        case 'runner:fail': this._onRunnerFail( event.args[0],  event.args[1] ); break;
+        }
+    },
 
-            // container
+    _onRunnerStart: function () {
+        // runner
+        var el = _fragment('<li class="suite"><h1><a>%s</a></h1></li>', this.$.runner.title);
+
+        // container
+        Polymer.dom(this.stack[0]).appendChild(el);
+        this.stack.unshift(document.createElement('ul'));
+        Polymer.dom(el).appendChild(this.stack[0]);
+        this._scrollToEnd();
+    },
+
+    _onRunnerEnd: function () {
+        // console.log('%s runner finish', Url.basename(this.$.runner.src));
+        this.stack.shift();
+        this.next();
+    },
+
+    _onRunnerSuite: function ( suite ) {
+        if ( suite.root )
+            return;
+
+        // suite
+        var el = _fragment('<li class="suite"><h1><a>%s</a></h1></li>', _escape(suite.title));
+
+        // container
+        Polymer.dom(this.stack[0]).appendChild(el);
+        this.stack.unshift(document.createElement('ul'));
+        Polymer.dom(el).appendChild(this.stack[0]);
+        this._scrollToEnd();
+    },
+
+    _onRunnerSuiteEnd: function ( suite ) {
+        if ( suite.root )
+            return;
+
+        this.stack.shift();
+    },
+
+    _onRunnerTestEnd: function ( stats, test ) {
+        this.passes = this.lastPasses + stats.passes;
+        this.failures = this.lastFailures + stats.failures;
+        this.duration = this.lastDuration + stats.duration / 1000;
+        this.progress = this.lastProgress + stats.progress/this._tests.length;
+
+        // test
+        var el;
+        if ( test.state === 'passed' ) {
+            el = _createPassEL(test);
+        } else if (test.pending) {
+            el = _createPendingEL(test);
+        } else {
+            el = _createFailEL(test, test.err);
+        }
+
+        // toggle code
+        // TODO: defer
+        if (!test.pending) {
+            var h2 = el.getElementsByTagName('h2')[0];
+
+            h2.addEventListener( 'click', function () {
+                pre.style.display = 'none' == pre.style.display ? 'block' : 'none';
+            });
+
+            var pre = _fragment('<pre><code>%e</code></pre>', _clean(test.fn));
+            Polymer.dom(el).appendChild(pre);
+            pre.style.display = 'none';
+        }
+
+        // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
+        if (this.stack[0]) {
             Polymer.dom(this.stack[0]).appendChild(el);
-            this.stack.unshift(document.createElement('ul'));
-            Polymer.dom(el).appendChild(this.stack[0]);
             this._scrollToEnd();
+        }
+    },
 
-            break;
-
-        case 'runner:end':
-            // console.log('%s runner finish', Url.basename(this.$.runner.src));
-            this.stack.shift();
-            this.next();
-            break;
-
-        case 'runner:suite':
-            suite = event.args[0];
-
-            if ( suite.root ) return;
-
-            // suite
-            el = _fragment('<li class="suite"><h1><a>%s</a></h1></li>', _escape(suite.title));
-
-            // container
-            Polymer.dom(this.stack[0]).appendChild(el);
-            this.stack.unshift(document.createElement('ul'));
-            Polymer.dom(el).appendChild(this.stack[0]);
-            this._scrollToEnd();
-
-            break;
-
-        case 'runner:suite-end':
-            suite = event.args[0];
-
-            if ( suite.root ) return;
-
-            this.stack.shift();
-
-            break;
-
-        case 'runner:test':
-            break;
-
-        case 'runner:test-end':
-            stats = event.args[0];
-            test = event.args[1];
-            this.passes = this.lastPasses + stats.passes;
-            this.failures = this.lastFailures + stats.failures;
-            this.duration = this.lastDuration + stats.duration / 1000;
-            this.progress = this.lastProgress + stats.progress/this._tests.length;
-
-            // test
-            if ( test.state === 'passed' ) {
-                el = _createPassEL(test);
-            } else if (test.pending) {
-                el = _createPendingEL(test);
-            } else {
-                el = _createFailEL(test, test.err);
-            }
-
-            // toggle code
-            // TODO: defer
-            if (!test.pending) {
-                var h2 = el.getElementsByTagName('h2')[0];
-
-                h2.addEventListener( 'click', function () {
-                    pre.style.display = 'none' == pre.style.display ? 'block' : 'none';
-                });
-
-                var pre = _fragment('<pre><code>%e</code></pre>', _clean(test.fn));
-                Polymer.dom(el).appendChild(pre);
-                pre.style.display = 'none';
-            }
+    _onRunnerFail: function ( test, err ) {
+        if ( test.type === 'hook' ) {
+            var el = _createFailEL(test, err);
 
             // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
             if (this.stack[0]) {
                 Polymer.dom(this.stack[0]).appendChild(el);
                 this._scrollToEnd();
             }
-
-            break;
-
-        case 'runner:pending':
-            break;
-
-        case 'runner:pass':
-            break;
-
-        case 'runner:fail':
-            test = event.args[0];
-            err = event.args[1];
-
-            if ( test.type === 'hook' ) {
-                el = _createFailEL(test, err);
-
-                // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
-                if (this.stack[0]) {
-                    Polymer.dom(this.stack[0]).appendChild(el);
-                    this._scrollToEnd();
-                }
-            }
-
-            break;
         }
     },
 
@@ -380,6 +377,40 @@ Editor.registerPanel( 'tester.panel', {
             var scrollView = this.$['mocha-report-view'];
             scrollView.scrollTop = scrollView.scrollHeight;
         }.bind(this) );
+    },
+
+    // ipc
+    'tester:runner-start': function () {
+        this._onRunnerStart.apply( this, arguments );
+    },
+
+    'tester:runner-end': function () {
+        this._onRunnerEnd.apply( this, arguments );
+    },
+
+    'tester:runner-suite': function () {
+        this._onRunnerSuite.apply( this, arguments );
+    },
+
+    'tester:runner-suite-end': function () {
+        this._onRunnerSuiteEnd.apply( this, arguments );
+    },
+
+    'tester:runner-test': function () {
+    },
+
+    'tester:runner-pending': function () {
+    },
+
+    'tester:runner-pass': function () {
+    },
+
+    'tester:runner-fail': function () {
+        this._onRunnerFail.apply( this, arguments );
+    },
+
+    'tester:runner-test-end': function () {
+        this._onRunnerTestEnd.apply( this, arguments );
     },
 });
 
