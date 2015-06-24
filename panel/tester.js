@@ -265,6 +265,7 @@ Editor.registerPanel( 'tester.panel', {
             Polymer.dom(this.stack[0]).appendChild(el);
             this.stack.unshift(document.createElement('ul'));
             Polymer.dom(el).appendChild(this.stack[0]);
+            this._scrollToEnd();
 
             break;
 
@@ -286,6 +287,7 @@ Editor.registerPanel( 'tester.panel', {
             Polymer.dom(this.stack[0]).appendChild(el);
             this.stack.unshift(document.createElement('ul'));
             Polymer.dom(el).appendChild(this.stack[0]);
+            this._scrollToEnd();
 
             break;
 
@@ -333,8 +335,10 @@ Editor.registerPanel( 'tester.panel', {
             }
 
             // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
-            if (this.stack[0])
+            if (this.stack[0]) {
                 Polymer.dom(this.stack[0]).appendChild(el);
+                this._scrollToEnd();
+            }
 
             break;
 
@@ -352,7 +356,10 @@ Editor.registerPanel( 'tester.panel', {
                 el = _createFailEL(test, err);
 
                 // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
-                if (this.stack[0]) Polymer.dom(this.stack[0]).appendChild(el);
+                if (this.stack[0]) {
+                    Polymer.dom(this.stack[0]).appendChild(el);
+                    this._scrollToEnd();
+                }
             }
 
             break;
@@ -361,6 +368,18 @@ Editor.registerPanel( 'tester.panel', {
 
     _toFixed: function ( number, p ) {
         return number.toFixed(p);
+    },
+
+    _scrollToEnd: function () {
+        if ( this._scrollTaskID )
+            return;
+
+        // to make sure after layout and before render
+        this._scrollTaskID = window.requestAnimationFrame ( function () {
+            this._scrollTaskID = null;
+            var scrollView = this.$['mocha-report-view'];
+            scrollView.scrollTop = scrollView.scrollHeight;
+        }.bind(this) );
     },
 });
 
