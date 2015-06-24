@@ -21,13 +21,13 @@
         return event;
     }
 
-    function _mouseEventFor ( type, x, y, button ) {
+    function _mouseEventFor ( type, x, y, which ) {
         var props = {
             bubbles: true,
             cancelable: true,
             clientX: x,
             clientY: y,
-            button: button ? button-1 : -1,
+            button: which ? which-1 : -1,
         };
 
         var event = new MouseEvent(type,props);
@@ -109,6 +109,9 @@
             if ( typeof x !== 'number' || typeof y !== 'number' )
                 pos = this.middleOfNode(target);
 
+            if ( typeof button !== 'number' )
+                button = 1;
+
             Tester.mousedown(target, pos.x, pos.y);
             Tester.mouseup(target, pos.x, pos.y);
 
@@ -120,6 +123,9 @@
             if ( typeof x !== 'number' || typeof y !== 'number' )
                 pos = this.middleOfNode(target);
 
+            if ( typeof button !== 'number' )
+                button = 1;
+
             target.dispatchEvent(_mouseEventFor('dblclick', pos.x, pos.y, button ));
         },
 
@@ -128,6 +134,9 @@
             if ( typeof x !== 'number' || typeof y !== 'number' )
                 pos = this.middleOfNode(target);
 
+            if ( typeof button !== 'number' )
+                button = 1;
+
             target.dispatchEvent(_mouseEventFor('mousedown', pos.x, pos.y, button ));
         },
 
@@ -135,6 +144,9 @@
             var pos = { x: x, y: y };
             if ( typeof x !== 'number' || typeof y !== 'number' )
                 pos = this.middleOfNode(target);
+
+            if ( typeof button !== 'number' )
+                button = 1;
 
             target.dispatchEvent(_mouseEventFor('mouseup', pos.x, pos.y, button ));
         },

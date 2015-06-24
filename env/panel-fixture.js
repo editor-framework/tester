@@ -10,7 +10,10 @@
                 document.body.appendChild(frameEL);
                 this.frameEL = frameEL;
 
-                done(frameEL);
+                // sync to make sure element ready() invoked
+                setImmediate( function () {
+                    done(frameEL);
+                });
             }.bind(this));
         },
 
