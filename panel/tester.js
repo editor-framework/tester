@@ -380,6 +380,14 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     // ipc
+    'editor:dragstart': function () {
+        this.$.dragMask.hidden = false;
+    },
+
+    'editor:dragend': function () {
+        this.$.dragMask.hidden = true;
+    },
+
     'tester:runner-start': function () {
         this._onRunnerStart.apply( this, arguments );
     },
