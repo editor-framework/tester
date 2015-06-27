@@ -9,6 +9,7 @@
   "main": "main.js",
   "menus": {
     "Developer/Tester": {
+      "accelerator": "CmdOrCtrl+Shift+T",
       "message": "tester:open"
     }
   },
