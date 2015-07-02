@@ -9,6 +9,7 @@
   "main": "main.js",
   "menus": {
     "Developer/Tester": {
+      "icon": "panel/icon.png",
       "accelerator": "CmdOrCtrl+Shift+T",
       "message": "tester:open"
     }
@@ -18,6 +19,7 @@
       "frame": "panel/tester.html",
       "type": "dockable",
       "title": "Tester",
+      "icon": "panel/icon.png",
       "width": 500,
       "height": 800,
       "min-width": 340,
