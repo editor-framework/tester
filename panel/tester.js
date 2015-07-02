@@ -102,9 +102,8 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     'tester:run-tests': function ( pkgName ) {
-        Editor.Panel.open( 'tester.panel', {
-            name: pkgName,
-        });
+        Editor.Panel.focus('tester.panel');
+        this.runTests(pkgName);
     },
 
     reset: function () {
