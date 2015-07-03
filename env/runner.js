@@ -25,6 +25,7 @@
             mocha.globals([
                 'Editor',
                 'Polymer',
+                'chroma',
             ]);
             mocha.run();
         }
