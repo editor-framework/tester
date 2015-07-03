@@ -87,6 +87,8 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     ready: function () {
+        this._ipcList = [];
+
         this.reset();
     },
 
@@ -227,7 +229,7 @@ Editor.registerPanel( 'tester.panel', {
         }
     },
 
-    _proxyIpc: function () {
+    _sendToView: function () {
         var args = [].slice.call(arguments, 0);
         this.$.runner.send.apply(this.$.runner,args);
     },
@@ -259,10 +261,16 @@ Editor.registerPanel( 'tester.panel', {
         case 'tester:send':
             // NOTE: this will prevent us send back ipc message
             //       in ipc callstack which will make ipc event in reverse order
-            setImmediate( function () {
-                this._proxyIpc.apply(this,event.args);
-            }.bind(this));
-
+            if ( !this._timeoutID ) {
+                this._timeoutID = setTimeout( function () {
+                    for ( var i = 0; i < this._ipcList.length; ++i ) {
+                        this._sendToView.apply( this, this._ipcList[i] );
+                    }
+                    this._ipcList = [];
+                    this._timeoutID = null;
+                }.bind(this),1);
+            }
+            this._ipcList.push( event.args );
             break;
 
         case 'runner:start': this._onRunnerStart(); break;
