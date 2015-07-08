@@ -10,16 +10,19 @@
             var self = this;
 
             if ( url ) {
-                Polymer.Base.importHref( url, function ( event ) {
+                EditorUI.import( url, function ( err ) {
+                    if ( err ) {
+                        Editor.error( 'Failed to load %s. message: %s', url, err.message );
+                        done();
+                        return;
+                    }
+
                     self.createFrom( self._fixtureTemplate, function ( el ) {
                         if ( el ) {
                             self.appendChild(el);
                         }
                         done(el);
                     });
-                }, function ( err ) {
-                    Editor.error( 'Failed to load %s. message: %s', url, err.message );
-                    done();
                 });
             }
             else {
