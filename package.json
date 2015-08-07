@@ -4,7 +4,7 @@
   "description": "A man who test your code day and night without payment.",
   "author": "Firebox Technology",
   "hosts": {
-      "editor-framework": "^0.3.12"
+    "editor-framework": "^0.3.14"
   },
   "main": "main.js",
   "menus": {
@@ -24,8 +24,7 @@
       "height": 800,
       "min-width": 340,
       "min-height": 400,
-      "shortcuts": {
-      },
+      "shortcuts": {},
       "messages": [
         "tester:run-tests",
         "tester:runner-start",
@@ -43,7 +42,7 @@
     }
   },
   "tests": [
-      "test/all-styles.html",
-      "test/ghost-tester.html"
+    "test/all-styles.html",
+    "test/ghost-tester.html"
   ]
 }
