@@ -81,8 +81,6 @@ function _createFailEL ( test, err ) {
 
 //
 Editor.registerPanel( 'tester.panel', {
-    is: 'editor-tester',
-
     properties: {
     },
 
