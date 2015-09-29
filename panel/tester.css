@@ -103,7 +103,6 @@ webview {
 
 #mocha .test.pending:hover h2::after {
     content: ' [pending]';
-    font-family: arial, sans-serif;
     font-style: italic;
 }
 
