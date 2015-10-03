@@ -1,11 +1,22 @@
 :host {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    flex-direction: column;
+    @apply(--layout-vertical);
 
     overflow: hidden;
     white-space: nowrap;
+}
+
+#runner {
+    color: #888;
+    background-color: #333;
+    white-space: nowrap;
+}
+
+#runner h1 {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    margin: 0px;
 }
 
 #webviewWrapper {
@@ -39,7 +50,11 @@ webview {
 
 #mocha {
     font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
-    position: relative;
+    position: absolute;
+    top: 200;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 #mocha ul,

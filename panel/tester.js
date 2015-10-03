@@ -92,7 +92,7 @@ Editor.registerPanel( 'tester.panel', {
 
     'panel:open': function ( argv ) {
         if ( !argv || !argv.name ) {
-            this._tests = ['packages://tester/env/empty.html'];
+            this._tests = [];
             this.reset();
             this.next();
             return;
@@ -125,8 +125,8 @@ Editor.registerPanel( 'tester.panel', {
         }
         this.stack = [mochaReportEL];
 
-        if ( !this._tests || this._tests.length === 0 ) {
-            this._tests = ['packages://tester/env/empty.html'];
+        if ( !this._tests || !this._tests.length ) {
+            this._tests = [];
         }
     },
 
@@ -221,10 +221,21 @@ Editor.registerPanel( 'tester.panel', {
     },
 
     _end: function () {
-        this.resetRunner();
         if ( this.$.runner ) {
-            this.$.runner.src = Editor.url('packages://tester/env/empty.html');
+            Polymer.dom(this.$.webviewWrapper).removeChild(this.$.runner);
+            this.$.runner = null;
         }
+
+        var div = document.createElement('div');
+        div.setAttribute( 'id', 'runner' );
+        div.classList.add('fit');
+        this.$.runner = div;
+
+        var h1 = document.createElement('h1');
+        h1.innerText = 'No Test';
+        div.appendChild(h1);
+
+        Polymer.dom(this.$.webviewWrapper).appendChild(this.$.runner);
     },
 
     _sendToView: function () {
