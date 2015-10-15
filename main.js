@@ -16,7 +16,7 @@ module.exports = {
 
         var exePath = App.getPath('exe');
 
-        var cp = Spawn(exePath, [Editor.appPath, '--test', file, '--report-details'], {
+        var cp = Spawn(exePath, [Editor.App.path, '--test', file, '--report-details'], {
             stdio: [ 0, 1, 2, 'ipc' ],
         });
 
