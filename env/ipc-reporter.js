@@ -1,4 +1,6 @@
 (function () {
+    'use strict';
+
     /**
      * Module dependencies.
      */
@@ -59,7 +61,7 @@
     function IpcReporter(runner) {
         Base.call(this, runner);
 
-        var self = this, stats = this.stats;
+        var stats = this.stats;
 
         runner.on('start', function () {
             Ipc.sendToHost('runner:start');

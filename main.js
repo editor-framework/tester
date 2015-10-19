@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
     load: function () {
     },
@@ -12,7 +14,6 @@ module.exports = {
     'tester:run-test': function ( file ) {
         var Spawn = require('child_process').spawn;
         var App = require('app');
-        var Ipc = require('ipc');
 
         var exePath = App.getPath('exe');
 
