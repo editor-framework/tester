@@ -1,27 +1,68 @@
+<link rel="import" href="packages://ui-kit/widget/index.html">
+
 <dom-module id="editor-tester">
-    <link rel="import" type="css" href="tester.css">
+  <link rel="import" type="css" href="tester.css">
 
-    <template>
-        <div id="webviewWrapper">
-            <div id="runner" class="fit">
-                <h1>No Test</h1>
-            </div>
-            <div id="dragMask" class="fit" hidden></div>
+  <template>
+    <div id="mocha" class="layout vertical flex-1">
+      <ul id="mocha-stats">
+        <li class="passes"><a>passes:</a> <em>{{passes}}</em></li>
+        <li class="failures"><a>failures:</a> <em>{{failures}}</em></li>
+        <li class="duration">duration: <em>{{_toFixed(duration,2)}}</em>s</li>
+        <li class="progress">progress: <em>{{_toFixed(progress,2)}}</em>%</li>
+      </ul>
+
+      <div id="mocha-report-view" class="scroll flex-1">
+        <ul id="mocha-report"></ul>
+      </div>
+    </div>
+
+    <div class="settings">
+      <div class="prop">
+        <div class="prop-name">Module</div>
+        <editor-select class="flex-2" value="{{module}}">
+          <template is="dom-repeat" items="{{_moduleInfos}}">
+            <editor-option value="{{item.value}}" text="{{item.text}}">{{item.text}}</editor-option>
+          </template>
+        </editor-select>
+      </div>
+
+      <template is="dom-if" if="{{_isPackages(module)}}">
+        <div class="prop">
+          <div class="prop-name">Package</div>
+          <editor-select class="flex-2" value="{{pkg}}">
+            <template is="dom-repeat" items="{{_packages}}">
+              <editor-option value="{{item.value}}" text="{{item.text}}">{{item.text}}</editor-option>
+            </template>
+          </editor-select>
         </div>
-        <div id="mocha" class="layout vertical flex-1">
-            <ul id="mocha-stats">
-                <li><i class="fa fa-refresh btn" on-click="_onReload"></i></li>
-                <li class="passes"><a>passes:</a> <em>{{passes}}</em></li>
-                <li class="failures"><a>failures:</a> <em>{{failures}}</em></li>
-                <li class="duration">duration: <em>{{_toFixed(duration,2)}}</em>s</li>
-                <li class="progress">progress: <em>{{_toFixed(progress,2)}}</em>%</li>
-            </ul>
+      </template>
 
-            <div id="mocha-report-view" class="scroll flex-1">
-                <ul id="mocha-report"></ul>
-            </div>
-        </div>
-    </template>
+      <div class="prop">
+        <div class="prop-name">File</div>
+        <editor-select class="flex-2" value="{{file}}">
+          <template is="dom-repeat" items="{{_files}}">
+            <editor-option value="{{item}}">{{item}}</editor-option>
+          </template>
+        </editor-select>
+      </div>
 
-    <script type="text/javascript" src="tester.js"></script>
+      <div class="prop">
+        <div class="prop-name">Mode</div>
+        <editor-select class="flex-2" value="{{mode}}">
+          <editor-option value="auto" text="Auto">Auto</editor-option>
+          <editor-option value="renderer" text="Renderer">Renderer</editor-option>
+        </editor-select>
+      </div>
+
+      <div class="prop">
+        <span class="flex-1"></span>
+        <editor-button><i class="fa fa-play" on-click="_onRun"></i></editor-button>
+        <editor-button><i class="fa fa-refresh" on-click="_onReload"></i></editor-button>
+      </div>
+
+    </div>
+  </template>
+
+  <script type="text/javascript" src="tester.js"></script>
 </dom-module>

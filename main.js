@@ -1,67 +1,76 @@
 'use strict';
 
 module.exports = {
-    load: function () {
-    },
+  load () {
+  },
 
-    unload: function () {
-    },
+  unload () {
+  },
 
-    'tester:open': function () {
-        Editor.Panel.open('tester.panel');
-    },
+  'tester:open' () {
+    Editor.Panel.open('tester.panel');
+  },
 
-    'tester:run-test': function ( file ) {
-        var Spawn = require('child_process').spawn;
-        var App = require('app');
+  'tester:query-hosts' ( reply ) {
+    let hosts = Object.keys(Editor.versions);
+    let idx = hosts.indexOf(Editor.App.name);
+    if ( idx !== -1 ) {
+      hosts.splice( idx, 1 );
+    }
+    reply(hosts);
+  },
 
-        var exePath = App.getPath('exe');
+  'tester:run-test' ( file ) {
+    var Spawn = require('child_process').spawn;
+    var App = require('app');
 
-        var cp = Spawn(exePath, [Editor.App.path, '--test', file, '--report-details'], {
-            stdio: [ 0, 1, 2, 'ipc' ],
-        });
+    var exePath = App.getPath('exe');
 
-        cp.on ( 'message', function ( data ) {
-            var fn = ipcHandlers[data.channel];
-            if ( fn ) fn ( data );
-        });
+    var cp = Spawn(exePath, [Editor.App.path, '--test', file, '--report-details'], {
+      stdio: [ 0, 1, 2, 'ipc' ],
+    });
 
-        var ipcHandlers = {
-            'runner:start': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-start' );
-            },
+    cp.on ( 'message', function ( data ) {
+      var fn = ipcHandlers[data.channel];
+      if ( fn ) fn ( data );
+    });
 
-            'runner:end': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-end' );
-            },
+    var ipcHandlers = {
+      'runner:start' () {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-start' );
+      },
 
-            'runner:suite': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-suite', data.suite );
-            },
+      'runner:end' () {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-end' );
+      },
 
-            'runner:suite-end': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-suite-end', data.suite );
-            },
+      'runner:suite' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-suite', data.suite );
+      },
 
-            'runner:test': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-test', data.test );
-            },
+      'runner:suite-end' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-suite-end', data.suite );
+      },
 
-            'runner:pending': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-pending', data.test );
-            },
+      'runner:test' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-test', data.test );
+      },
 
-            'runner:pass': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-pass', data.test );
-            },
+      'runner:pending' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-pending', data.test );
+      },
 
-            'runner:fail': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-fail', data.test, data.err );
-            },
+      'runner:pass' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-pass', data.test );
+      },
 
-            'runner:test-end': function ( data ) {
-                Editor.sendToPanel( 'tester.panel', 'tester:runner-test-end', data.stats, data.test );
-            },
-        };
-    },
+      'runner:fail' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-fail', data.test, data.err );
+      },
+
+      'runner:test-end' ( data ) {
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-test-end', data.stats, data.test );
+      },
+    };
+  },
 };
