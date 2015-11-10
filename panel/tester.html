@@ -30,7 +30,7 @@
       <template is="dom-if" if="{{_isPackages(module)}}">
         <div class="prop">
           <div class="prop-name">Package</div>
-          <editor-select class="flex-2" value="{{pkg}}">
+          <editor-select class="flex-2" value="{{pkgPath}}">
             <template is="dom-repeat" items="{{_packages}}">
               <editor-option value="{{item.value}}" text="{{item.text}}">{{item.text}}</editor-option>
             </template>
@@ -53,6 +53,11 @@
           <editor-option value="auto" text="Auto">Auto</editor-option>
           <editor-option value="renderer" text="Renderer">Renderer</editor-option>
         </editor-select>
+      </div>
+
+      <div class="prop">
+        <div class="prop-name">Debug</div>
+        <editor-checkbox class="flex-2" value="{{debug}}"></editor-checkbox>
       </div>
 
       <div class="prop">

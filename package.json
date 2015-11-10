@@ -26,7 +26,6 @@
       "min-height": 400,
       "shortcuts": {},
       "messages": [
-        "tester:run-tests",
         "tester:runner-start",
         "tester:runner-end",
         "tester:runner-suite",
@@ -35,9 +34,7 @@
         "tester:runner-pending",
         "tester:runner-pass",
         "tester:runner-fail",
-        "tester:runner-test-end",
-        "editor:dragstart",
-        "editor:dragend"
+        "tester:runner-test-end"
       ]
     }
   },

@@ -94,7 +94,7 @@
         observer: '_moduleChanged'
       },
 
-      pkg: {
+      pkgPath: {
         value: '',
         type: String,
       },
@@ -107,6 +107,11 @@
       mode: {
         value: 'auto', // auto, renderer
         type: String,
+      },
+
+      debug: {
+        value: false,
+        type: Boolean,
       },
     },
 
@@ -141,7 +146,7 @@
             });
 
             if ( this._packages && this._packages.length ) {
-              this.pkg = this._packages[0].value;
+              this.pkgPath = this._packages[0].value;
             }
 
             next ();
@@ -160,14 +165,14 @@
       let path = Editor.url(`app://${this.module}/test`);
 
       if ( this.module === 'packages' ) {
-        if ( !this.pkg ) {
+        if ( !this.pkgPath ) {
           if ( cb ) {
             cb ();
           }
           return;
         }
 
-        path = Path.join( this.pkg, 'test' );
+        path = Path.join( this.pkgPath, 'test' );
       } else if ( this.module === 'app' ) {
         path = Editor.url(`app://test`);
       }
@@ -220,9 +225,9 @@
     },
 
     _moduleChanged () {
-      if ( !this.pkg && this.module === 'packages' ) {
+      if ( !this.pkgPath && this.module === 'packages' ) {
         if ( this._packages && this._packages.length ) {
-          this.pkg = this._packages[0].value;
+          this.pkgPath = this._packages[0].value;
         }
       }
       this._updateTestFiles();
@@ -230,6 +235,20 @@
 
     _isPackages ( module ) {
       return module === 'packages';
+    },
+
+    _onRun () {
+      Editor.sendToCore('tester:run', {
+        module: this.module,
+        package: this.pkgPath,
+        file: this.file,
+        mode: this.mode,
+        debug: this.debug
+      });
+    },
+
+    _onReload () {
+      // TODO
     },
 
     _onRunnerStart ( title ) {
@@ -336,14 +355,6 @@
     },
 
     // ipc
-    'editor:dragstart' () {
-      this.$.dragMask.hidden = false;
-    },
-
-    'editor:dragend' () {
-      this.$.dragMask.hidden = true;
-    },
-
     'tester:runner-start' () {
       this._onRunnerStart.apply( this, arguments );
     },

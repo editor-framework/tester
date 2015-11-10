@@ -1,5 +1,7 @@
 'use strict';
 
+const Path = require('fire-path');
+
 module.exports = {
   load () {
   },
@@ -20,14 +22,36 @@ module.exports = {
     reply(hosts);
   },
 
-  'tester:run-test' ( file ) {
-    var Spawn = require('child_process').spawn;
-    var App = require('app');
+  'tester:run' ( info ) {
+    const Spawn = require('child_process').spawn;
+    const App = require('app');
+    const exePath = App.getPath('exe');
 
-    var exePath = App.getPath('exe');
+    let args = [Editor.App.path, 'test'];
+    let file = info.file;
 
-    var cp = Spawn(exePath, [Editor.App.path, '--test', file, '--report-details'], {
-      stdio: [ 0, 1, 2, 'ipc' ],
+    if ( info.module === 'packages' ) {
+      args.push('--package');
+      file = Path.join( info.package, 'test', file );
+    } else if ( info.module === 'app' ) {
+      file = Path.join( Editor.App.path, 'test', file );
+    } else {
+      file = Path.join( Editor.App.path, info.module, 'test', file );
+    }
+
+    if ( info.mode === 'renderer' ) {
+      args.push('--renderer');
+    }
+
+    if ( info.debug ) {
+      args.push('--detail');
+    }
+
+    args.push(file);
+
+    var cp = Spawn(exePath, args, {
+      // stdio: [ 0, 1, 2, 'ipc' ],
+      stdio: 'inherit'
     });
 
     cp.on ( 'message', function ( data ) {
