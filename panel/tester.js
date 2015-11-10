@@ -92,7 +92,7 @@
             this.reset();
         },
 
-        'panel:open': function ( argv ) {
+        'panel:run': function ( argv ) {
             if ( !argv || !argv.name ) {
                 this._tests = [];
                 this.reset();
