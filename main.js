@@ -40,6 +40,8 @@ let _ipcHandlers = {
   },
 };
 
+let testProcess = null;
+
 module.exports = {
   load () {
   },
@@ -87,16 +89,52 @@ module.exports = {
 
     args.push(file);
 
-    let cp = Spawn(exePath, args, {
+    testProcess = Spawn(exePath, args, {
       stdio: [ 0, 1, 2, 'ipc' ],
       // stdio: 'inherit'
     });
 
-    cp.on('message', function ( data ) {
+    testProcess.on('message', data => {
       let fn = _ipcHandlers[data.channel];
       if ( fn ) {
         fn ( data );
       }
+    });
+
+    testProcess.on('close', () => {
+      testProcess = null;
+      Editor.sendToPanel( 'tester.panel', 'tester:runner-close' );
+    });
+  },
+
+  'tester:reload' () {
+    if ( !testProcess ) {
+      return;
+    }
+
+    console.log('reload');
+    testProcess.send({
+      channel: 'tester:reload'
+    });
+  },
+
+  'tester:active-test-window' () {
+    if ( !testProcess ) {
+      return;
+    }
+
+    testProcess.send({
+      channel: 'tester:active-window'
+    });
+  },
+
+  'tester:close' () {
+    if ( !testProcess ) {
+      return;
+    }
+
+    testProcess.send({
+      channel: 'tester:exit'
     });
   },
 };

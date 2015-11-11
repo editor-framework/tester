@@ -175,6 +175,7 @@
       ]);
 
       this.reset();
+      this._running = false;
     },
 
     _updateTestFiles ( cb ) {
@@ -253,11 +254,12 @@
     },
 
     _onRun () {
-      // change icon to loading
-      this.$.playIcon.hidden = true;
-      this.$.loadIcon.hidden = false;
+      if ( this._running )
+        return;
 
       this.reset();
+      this._running = true;
+
       Editor.sendToCore('tester:run', {
         module: this.module,
         package: this.pkgPath,
@@ -268,10 +270,24 @@
     },
 
     _onReload () {
-      // TODO
+      Editor.sendToCore('tester:reload');
+    },
+
+    _onActiveTestWindow () {
+      Editor.sendToCore('tester:active-test-window');
+    },
+
+    _onClose () {
+      Editor.sendToCore('tester:close');
+    },
+
+    _onRunnerClose () {
+      this._running = false;
     },
 
     _onRunnerStart () {
+      this.reset();
+
       let title = '';
       if ( this.module === 'app' ) {
         title = `${this.file}`;
@@ -294,10 +310,6 @@
     _onRunnerEnd () {
       // console.log('%s runner finish', Url.basename(this.$.runner.src));
       this.stack.shift();
-
-      // change icon to play
-      this.$.playIcon.hidden = false;
-      this.$.loadIcon.hidden = true;
     },
 
     _onRunnerSuite ( suite ) {
@@ -414,6 +426,10 @@
 
     'tester:runner-test-end' (test, stats) {
       this._onRunnerTestEnd(test, stats);
+    },
+
+    'tester:runner-close' () {
+      this._onRunnerClose();
     },
   });
 

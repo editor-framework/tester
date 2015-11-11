@@ -34,7 +34,8 @@
         "tester:runner-pending",
         "tester:runner-pass",
         "tester:runner-fail",
-        "tester:runner-test-end"
+        "tester:runner-test-end",
+        "tester:runner-close"
       ]
     }
   },

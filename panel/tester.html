@@ -64,10 +64,18 @@
       <div class="prop">
         <span class="flex-1"></span>
         <editor-button on-click="_onRun">
-          <editor-loader id="loadIcon" class="mini" hidden></editor-loader>
-          <i id="playIcon" class="fa fa-play"></i>
+          <editor-loader id="loadIcon" class="mini" hidden="{{!_running}}"></editor-loader>
+          <i id="playIcon" class="fa fa-play" hidden="{{_running}}"></i>
         </editor-button>
-        <editor-button on-click="_onReload"><i class="fa fa-refresh"></i></editor-button>
+        <editor-button on-click="_onReload" disabled="{{!_running}}">
+          <i class="fa fa-refresh"></i>
+        </editor-button>
+        <editor-button on-click="_onActiveTestWindow" disabled="{{!_running}}">
+          <i class="fa fa-eye"></i>
+        </editor-button>
+        <editor-button on-click="_onClose" disabled="{{!_running}}">
+          <i class="fa fa-close"></i>
+        </editor-button>
       </div>
 
     </div>
