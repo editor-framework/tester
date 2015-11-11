@@ -1,6 +1,7 @@
 <link rel="import" href="packages://ui-kit/widget/index.html">
 
 <dom-module id="editor-tester">
+  <link rel="import" type="css" href="app://node_modules/highlight.js/styles/hopscotch.css">
   <link rel="import" type="css" href="tester.css">
 
   <template>
@@ -17,7 +18,7 @@
       </div>
     </div>
 
-    <div class="settings">
+    <div class="settings flex-none">
       <div class="prop">
         <div class="prop-name">Module</div>
         <editor-select class="flex-2" value="{{module}}">
@@ -57,13 +58,16 @@
 
       <div class="prop">
         <div class="prop-name">Debug</div>
-        <editor-checkbox class="flex-2" value="{{debug}}"></editor-checkbox>
+        <editor-checkbox class="flex-2" checked="{{debug}}"></editor-checkbox>
       </div>
 
       <div class="prop">
         <span class="flex-1"></span>
-        <editor-button><i class="fa fa-play" on-click="_onRun"></i></editor-button>
-        <editor-button><i class="fa fa-refresh" on-click="_onReload"></i></editor-button>
+        <editor-button on-click="_onRun">
+          <editor-loader id="loadIcon" class="mini" hidden></editor-loader>
+          <i id="playIcon" class="fa fa-play"></i>
+        </editor-button>
+        <editor-button on-click="_onReload"><i class="fa fa-refresh"></i></editor-button>
       </div>
 
     </div>

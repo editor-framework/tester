@@ -4,6 +4,7 @@
   const Path = require('fire-path');
   const Globby = require('globby');
   const Async = require('async');
+  const Hljs = require('highlight.js');
 
   function _escape (html) {
     return String(html)
@@ -66,7 +67,8 @@
     return _fragment('<li class="test pass pending"><h2>%e</h2></li>', test.title);
   }
 
-  function _createFailEL ( test, err ) {
+  function _createFailEL ( test ) {
+    let err = test.err;
     let el = _fragment('<li class="test fail"><h2>%e</h2></li>', test.title, _makeUrl(test.fullTitle));
     let errText = err.stack;
 
@@ -85,6 +87,19 @@
     return el;
   }
 
+  function _appendCodePre ( el, test ) {
+    let h2 = el.getElementsByTagName('h2')[0];
+    let result = Hljs.highlight( 'javascript', _clean(test.fn) );
+    let pre = _fragment('<pre id="code">%s</pre>', result.value);
+
+    h2.addEventListener( 'click', function () {
+      pre.style.display = 'none' === pre.style.display ? 'block' : 'none';
+    });
+
+    Polymer.dom(el).appendChild(pre);
+    pre.style.display = 'none';
+  }
+
   //
   Editor.registerPanel('tester.panel', {
     properties: {
@@ -97,6 +112,7 @@
       pkgPath: {
         value: '',
         type: String,
+        observer: '_pkgPathChanged'
       },
 
       file: {
@@ -177,6 +193,8 @@
         path = Editor.url(`app://test`);
       }
 
+      this.file = '';
+
       Globby([
         Path.join(path,'**/*.js'),
         '!**/fixtures/**',
@@ -206,13 +224,6 @@
       this.duration = 0;
       this.progress = 0;
 
-      this.lastPasses = 0;
-      this.lastFailures = 0;
-      this.lastDuration = 0;
-      this.lastProgress = 0;
-
-      this.curTestIdx = -1;
-
       let mochaReportEL = this.$['mocha-report'];
       while ( mochaReportEL.children.length ) {
         mochaReportEL.firstChild.remove();
@@ -233,11 +244,20 @@
       this._updateTestFiles();
     },
 
+    _pkgPathChanged () {
+      this._updateTestFiles();
+    },
+
     _isPackages ( module ) {
       return module === 'packages';
     },
 
     _onRun () {
+      // change icon to loading
+      this.$.playIcon.hidden = true;
+      this.$.loadIcon.hidden = false;
+
+      this.reset();
       Editor.sendToCore('tester:run', {
         module: this.module,
         package: this.pkgPath,
@@ -251,7 +271,16 @@
       // TODO
     },
 
-    _onRunnerStart ( title ) {
+    _onRunnerStart () {
+      let title = '';
+      if ( this.module === 'app' ) {
+        title = `${this.file}`;
+      } else if ( this.module === 'packages' ) {
+        title = `${this.file} (${Path.basename(this.pkgPath)})`;
+      } else {
+        title = `${this.file} (${this.module})`;
+      }
+
       // runner
       let el = _fragment('<li class="suite"><h1><a>%s</a></h1></li>', title);
 
@@ -265,7 +294,10 @@
     _onRunnerEnd () {
       // console.log('%s runner finish', Url.basename(this.$.runner.src));
       this.stack.shift();
-      this.next();
+
+      // change icon to play
+      this.$.playIcon.hidden = false;
+      this.$.loadIcon.hidden = true;
     },
 
     _onRunnerSuite ( suite ) {
@@ -289,35 +321,19 @@
       this.stack.shift();
     },
 
-    _onRunnerTestEnd ( stats, test ) {
-      this.passes = this.lastPasses + stats.passes;
-      this.failures = this.lastFailures + stats.failures;
-      this.duration = this.lastDuration + stats.duration / 1000;
-      this.progress = this.lastProgress + stats.progress/this._tests.length;
+    _onRunnerTest () {
+    },
 
-      // test
-      let el;
-      if ( test.state === 'passed' ) {
-        el = _createPassEL(test);
-      } else if (test.pending) {
-        el = _createPendingEL(test);
-      } else {
-        el = _createFailEL(test, test.err);
-      }
+    _onRunnerTestEnd ( test, stats ) {
+      this.passes = stats.passes;
+      this.failures = stats.failures;
+      this.duration = stats.duration / 1000;
+      this.progress = stats.progress;
+    },
 
-      // toggle code
-      // TODO: defer
-      if (!test.pending) {
-        let h2 = el.getElementsByTagName('h2')[0];
-        let pre = _fragment('<pre><code>%e</code></pre>', _clean(test.fn));
-
-        h2.addEventListener( 'click', function () {
-          pre.style.display = 'none' === pre.style.display ? 'block' : 'none';
-        });
-
-        Polymer.dom(el).appendChild(pre);
-        pre.style.display = 'none';
-      }
+    _onRunnerFail ( test ) {
+      let el = _createFailEL(test);
+      _appendCodePre ( el, test );
 
       // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
       if (this.stack[0]) {
@@ -326,15 +342,24 @@
       }
     },
 
-    _onRunnerFail ( test, err ) {
-      if ( test.type === 'hook' ) {
-        let el = _createFailEL(test, err);
+    _onRunnerPass ( test ) {
+      let el = _createPassEL(test);
+      _appendCodePre ( el, test );
 
-        // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
-        if (this.stack[0]) {
-          Polymer.dom(this.stack[0]).appendChild(el);
-          this._scrollToEnd();
-        }
+      // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
+      if (this.stack[0]) {
+        Polymer.dom(this.stack[0]).appendChild(el);
+        this._scrollToEnd();
+      }
+    },
+
+    _onRunnerPending ( test ) {
+      let el = _createPendingEL(test);
+
+      // Don't call .appendChild if #mocha-report was already .shift()'ed off the stack.
+      if (this.stack[0]) {
+        Polymer.dom(this.stack[0]).appendChild(el);
+        this._scrollToEnd();
       }
     },
 
@@ -356,36 +381,39 @@
 
     // ipc
     'tester:runner-start' () {
-      this._onRunnerStart.apply( this, arguments );
+      this._onRunnerStart();
     },
 
     'tester:runner-end' () {
-      this._onRunnerEnd.apply( this, arguments );
+      this._onRunnerEnd();
     },
 
-    'tester:runner-suite' () {
-      this._onRunnerSuite.apply( this, arguments );
+    'tester:runner-suite' ( suite ) {
+      this._onRunnerSuite(suite);
     },
 
-    'tester:runner-suite-end' () {
-      this._onRunnerSuiteEnd.apply( this, arguments );
+    'tester:runner-suite-end' ( suite ) {
+      this._onRunnerSuiteEnd(suite);
     },
 
-    'tester:runner-test' () {
+    'tester:runner-test' ( test ) {
+      this._onRunnerTest(test);
     },
 
-    'tester:runner-pending' () {
+    'tester:runner-pending' (test) {
+      this._onRunnerPending(test);
     },
 
-    'tester:runner-pass' () {
+    'tester:runner-pass' (test) {
+      this._onRunnerPass(test);
     },
 
-    'tester:runner-fail' () {
-      this._onRunnerFail.apply( this, arguments );
+    'tester:runner-fail' (test) {
+      this._onRunnerFail(test);
     },
 
-    'tester:runner-test-end' () {
-      this._onRunnerTestEnd.apply( this, arguments );
+    'tester:runner-test-end' (test, stats) {
+      this._onRunnerTestEnd(test, stats);
     },
   });
 

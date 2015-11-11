@@ -35,6 +35,13 @@
   margin-left: 5px;
 }
 
+.prop editor-button editor-loader {
+  width: 12px;
+  height: 12px;
+  top: -3px;
+  left: 2px;
+}
+
 #mocha {
   font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -185,12 +192,12 @@
   clear: left;
   margin: 5px;
   padding: 15px;
-  max-width: calc(100% - 50px); /*(2)*/
+  width: calc(100% - 50px); /*(2)*/
   word-wrap: break-word;
   font: 12px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: bold;
 
-  color: #888;
+  color: #999;
   box-shadow: 0 1px 3px #171717;
   /* border: 1px solid #555; */
   background: #3a3a3a;
