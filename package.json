@@ -8,10 +8,11 @@
   },
   "main": "main.js",
   "menus": {
-    "Developer/Tester": {
+    "i18n:MAIN_MENU.developer.title/Tester": {
       "icon": "panel/icon.png",
       "accelerator": "CmdOrCtrl+Shift+T",
-      "message": "tester:open"
+      "message": "tester:open",
+      "dev": true
     }
   },
   "panels": {
