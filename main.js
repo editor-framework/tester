@@ -53,7 +53,7 @@ module.exports = {
     Editor.Panel.open('tester.panel');
   },
 
-  'tester:query-hosts' ( reply ) {
+  'tester:query-hosts' ( event, reply ) {
     let hosts = Object.keys(Editor.versions);
     let idx = hosts.indexOf(Editor.App.name);
     if ( idx !== -1 ) {
@@ -62,7 +62,7 @@ module.exports = {
     reply(hosts);
   },
 
-  'tester:run' ( info ) {
+  'tester:run' ( event, info ) {
     const Spawn = require('child_process').spawn;
     const App = require('app');
     const exePath = App.getPath('exe');
