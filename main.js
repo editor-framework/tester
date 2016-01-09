@@ -1,5 +1,6 @@
 'use strict';
 
+const Electron = require('electron');
 const Path = require('fire-path');
 
 let _ipcHandlers = {
@@ -64,8 +65,6 @@ module.exports = {
 
   'tester:run' ( event, info ) {
     const Spawn = require('child_process').spawn;
-    const App = require('app');
-    const exePath = App.getPath('exe');
 
     let args = [Editor.App.path, 'test', '--reporter', 'child-process'];
     let file = info.file;
@@ -89,6 +88,7 @@ module.exports = {
 
     args.push(file);
 
+    let exePath = Electron.app.getPath('exe');
     testProcess = Spawn(exePath, args, {
       stdio: [ 0, 1, 2, 'ipc' ],
       // stdio: 'inherit'
