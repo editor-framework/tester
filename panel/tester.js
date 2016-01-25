@@ -254,8 +254,9 @@
     },
 
     _onRun () {
-      if ( this._running )
+      if ( this._running ) {
         return;
+      }
 
       this.reset();
       this._running = true;
