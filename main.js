@@ -50,91 +50,93 @@ module.exports = {
   unload () {
   },
 
-  'tester:open' () {
-    Editor.Panel.open('tester.panel');
-  },
+  messages: {
+    open () {
+      Editor.Panel.open('tester.panel');
+    },
 
-  'tester:query-hosts' ( event, reply ) {
-    let hosts = Object.keys(Editor.versions);
-    let idx = hosts.indexOf(Editor.App.name);
-    if ( idx !== -1 ) {
-      hosts.splice( idx, 1 );
-    }
-    reply(hosts);
-  },
-
-  'tester:run' ( event, info ) {
-    const Spawn = require('child_process').spawn;
-
-    let args = [Editor.App.path, 'test', '--reporter', 'child-process'];
-    let file = info.file;
-
-    if ( info.module === 'packages' ) {
-      args.push('--package');
-      file = Path.join( info.package, 'test', file );
-    } else if ( info.module === 'app' ) {
-      file = Path.join( Editor.App.path, 'test', file );
-    } else {
-      file = Path.join( Editor.App.path, info.module, 'test', file );
-    }
-
-    if ( info.mode === 'renderer' ) {
-      args.push('--renderer');
-    }
-
-    if ( info.debug ) {
-      args.push('--detail');
-    }
-
-    args.push(file);
-
-    let exePath = Electron.app.getPath('exe');
-    testProcess = Spawn(exePath, args, {
-      stdio: [ 0, 1, 2, 'ipc' ],
-      // stdio: 'inherit'
-    });
-
-    testProcess.on('message', data => {
-      let fn = _ipcHandlers[data.channel];
-      if ( fn ) {
-        fn ( data );
+    'query-hosts' ( event, reply ) {
+      let hosts = Object.keys(Editor.versions);
+      let idx = hosts.indexOf(Editor.App.name);
+      if ( idx !== -1 ) {
+        hosts.splice( idx, 1 );
       }
-    });
+      reply(hosts);
+    },
 
-    testProcess.on('close', () => {
-      testProcess = null;
-      Editor.sendToPanel( 'tester.panel', 'tester:runner-close' );
-    });
-  },
+    run ( event, info ) {
+      const Spawn = require('child_process').spawn;
 
-  'tester:reload' () {
-    if ( !testProcess ) {
-      return;
-    }
+      let args = [Editor.App.path, 'test', '--reporter', 'child-process'];
+      let file = info.file;
 
-    console.log('reload');
-    testProcess.send({
-      channel: 'tester:reload'
-    });
-  },
+      if ( info.module === 'packages' ) {
+        args.push('--package');
+        file = Path.join( info.package, 'test', file );
+      } else if ( info.module === 'app' ) {
+        file = Path.join( Editor.App.path, 'test', file );
+      } else {
+        file = Path.join( Editor.App.path, info.module, 'test', file );
+      }
 
-  'tester:active-test-window' () {
-    if ( !testProcess ) {
-      return;
-    }
+      if ( info.mode === 'renderer' ) {
+        args.push('--renderer');
+      }
 
-    testProcess.send({
-      channel: 'tester:active-window'
-    });
-  },
+      if ( info.debug ) {
+        args.push('--detail');
+      }
 
-  'tester:close' () {
-    if ( !testProcess ) {
-      return;
-    }
+      args.push(file);
 
-    testProcess.send({
-      channel: 'tester:exit'
-    });
+      let exePath = Electron.app.getPath('exe');
+      testProcess = Spawn(exePath, args, {
+        stdio: [ 0, 1, 2, 'ipc' ],
+        // stdio: 'inherit'
+      });
+
+      testProcess.on('message', data => {
+        let fn = _ipcHandlers[data.channel];
+        if ( fn ) {
+          fn ( data );
+        }
+      });
+
+      testProcess.on('close', () => {
+        testProcess = null;
+        Editor.sendToPanel( 'tester.panel', 'tester:runner-close' );
+      });
+    },
+
+    reload () {
+      if ( !testProcess ) {
+        return;
+      }
+
+      console.log('reload');
+      testProcess.send({
+        channel: 'tester:reload'
+      });
+    },
+
+    'active-test-window' () {
+      if ( !testProcess ) {
+        return;
+      }
+
+      testProcess.send({
+        channel: 'tester:active-window'
+      });
+    },
+
+    close () {
+      if ( !testProcess ) {
+        return;
+      }
+
+      testProcess.send({
+        channel: 'tester:exit'
+      });
+    },
   },
 };
