@@ -11,8 +11,7 @@
     "i18n:MAIN_MENU.developer.title/Tester": {
       "icon": "panel/icon.png",
       "accelerator": "CmdOrCtrl+Shift+T",
-      "message": "tester:open",
-      "dev": true
+      "message": "tester:open"
     }
   },
   "panels": {
