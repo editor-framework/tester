@@ -134,11 +134,11 @@
     ready: function () {
       Async.series([
         next => {
-          Editor.sendRequestToCore('tester:query-hosts', hosts => {
+          Editor.Ipc.sendToMain('tester:query-hosts', hosts => {
             hosts.unshift('packages');
             hosts.unshift('app');
             this._moduleInfos = hosts.map(name => {
-              return { value: name, text: EditorUI.toHumanText(name) };
+              return { value: name, text: Editor.UI.DomUtils.toHumanText(name) };
             });
 
             next();
@@ -146,7 +146,7 @@
         },
 
         next => {
-          Editor.sendRequestToCore('package:query-infos', infos => {
+          Editor.Ipc.sendToMain('editor:package-query-infos', infos => {
             this._packages = infos.map(info => {
               return {
                 value: info.path,
@@ -261,7 +261,7 @@
       this.reset();
       this._running = true;
 
-      Editor.sendToCore('tester:run', {
+      Editor.Ipc.sendToMain('tester:run', {
         module: this.module,
         package: this.pkgPath,
         file: this.file,
@@ -271,15 +271,15 @@
     },
 
     _onReload () {
-      Editor.sendToCore('tester:reload');
+      Editor.Ipc.sendToMain('tester:reload');
     },
 
     _onActiveTestWindow () {
-      Editor.sendToCore('tester:active-test-window');
+      Editor.Ipc.sendToMain('tester:active-test-window');
     },
 
     _onClose () {
-      Editor.sendToCore('tester:close');
+      Editor.Ipc.sendToMain('tester:close');
     },
 
     _onRunnerClose () {
@@ -401,31 +401,31 @@
       this._onRunnerEnd();
     },
 
-    'tester:runner-suite' ( suite ) {
+    'tester:runner-suite' ( event, suite ) {
       this._onRunnerSuite(suite);
     },
 
-    'tester:runner-suite-end' ( suite ) {
+    'tester:runner-suite-end' ( event, suite ) {
       this._onRunnerSuiteEnd(suite);
     },
 
-    'tester:runner-test' ( test ) {
+    'tester:runner-test' ( event, test ) {
       this._onRunnerTest(test);
     },
 
-    'tester:runner-pending' (test) {
+    'tester:runner-pending' ( event, test ) {
       this._onRunnerPending(test);
     },
 
-    'tester:runner-pass' (test) {
+    'tester:runner-pass' ( event, test ) {
       this._onRunnerPass(test);
     },
 
-    'tester:runner-fail' (test) {
+    'tester:runner-fail' ( event, test ) {
       this._onRunnerFail(test);
     },
 
-    'tester:runner-test-end' (test, stats) {
+    'tester:runner-test-end' ( event, test, stats ) {
       this._onRunnerTestEnd(test, stats);
     },
 

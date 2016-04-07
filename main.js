@@ -5,39 +5,39 @@ const Path = require('fire-path');
 
 let _ipcHandlers = {
   'runner:start' () {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-start' );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-start' );
   },
 
   'runner:end' () {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-end' );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-end' );
   },
 
   'runner:suite' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-suite', data.suite );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-suite', data.suite );
   },
 
   'runner:suite-end' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-suite-end', data.suite );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-suite-end', data.suite );
   },
 
   'runner:test' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-test', data.test );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-test', data.test );
   },
 
   'runner:pending' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-pending', data.test );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-pending', data.test );
   },
 
   'runner:pass' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-pass', data.test );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-pass', data.test );
   },
 
   'runner:fail' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-fail', data.test, data.err );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-fail', data.test, data.err );
   },
 
   'runner:test-end' ( data ) {
-    Editor.sendToPanel( 'tester.panel', 'tester:runner-test-end', data.test, data.stats );
+    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-test-end', data.test, data.stats );
   },
 };
 
@@ -55,13 +55,13 @@ module.exports = {
       Editor.Panel.open('tester.panel');
     },
 
-    'query-hosts' ( event, reply ) {
+    'query-hosts' ( event ) {
       let hosts = Object.keys(Editor.versions);
       let idx = hosts.indexOf(Editor.App.name);
       if ( idx !== -1 ) {
         hosts.splice( idx, 1 );
       }
-      reply(hosts);
+      event.reply(hosts);
     },
 
     run ( event, info ) {
@@ -104,7 +104,7 @@ module.exports = {
 
       testProcess.on('close', () => {
         testProcess = null;
-        Editor.sendToPanel( 'tester.panel', 'tester:runner-close' );
+        Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-close' );
       });
     },
 
