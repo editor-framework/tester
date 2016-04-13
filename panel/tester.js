@@ -4,7 +4,7 @@
   const Path = require('fire-path');
   const Globby = require('globby');
   const Async = require('async');
-  const Hljs = require('highlight.js');
+  // const Hljs = require('highlight.js');
 
   function _escape (html) {
     return String(html)
@@ -89,7 +89,8 @@
 
   function _appendCodePre ( el, test ) {
     let h2 = el.getElementsByTagName('h2')[0];
-    let result = Hljs.highlight( 'javascript', _clean(test.fn) );
+    // let result = Hljs.highlight( 'javascript', _clean(test.fn) );
+    let result = _clean(test.fn);
     let pre = _fragment('<pre id="code">%s</pre>', result.value);
 
     h2.addEventListener( 'click', function () {
@@ -134,7 +135,7 @@
     ready: function () {
       Async.series([
         next => {
-          Editor.Ipc.sendToMain('tester:query-hosts', hosts => {
+          Editor.Ipc.sendToMain('tester:query-hosts', (err,hosts) => {
             hosts.unshift('packages');
             hosts.unshift('app');
             this._moduleInfos = hosts.map(name => {
@@ -146,7 +147,7 @@
         },
 
         next => {
-          Editor.Ipc.sendToMain('editor:package-query-infos', infos => {
+          Editor.Ipc.sendToMain('editor:package-query-infos', (err,infos) => {
             this._packages = infos.map(info => {
               return {
                 value: info.path,

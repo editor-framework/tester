@@ -61,7 +61,7 @@ module.exports = {
       if ( idx !== -1 ) {
         hosts.splice( idx, 1 );
       }
-      event.reply(hosts);
+      event.reply(null,hosts);
     },
 
     run ( event, info ) {

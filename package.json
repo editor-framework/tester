@@ -39,6 +39,9 @@
       ]
     }
   },
+  "dependencies": {
+    "highlight.js": "^9.3.0"
+  },
   "tests": [
     "test/all-styles.html",
     "test/ghost-tester.html"
