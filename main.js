@@ -5,39 +5,39 @@ const Path = require('fire-path');
 
 let _ipcHandlers = {
   'runner:start' () {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-start' );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-start' );
   },
 
   'runner:end' () {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-end' );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-end' );
   },
 
   'runner:suite' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-suite', data.suite );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-suite', data.suite );
   },
 
   'runner:suite-end' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-suite-end', data.suite );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-suite-end', data.suite );
   },
 
   'runner:test' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-test', data.test );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-test', data.test );
   },
 
   'runner:pending' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-pending', data.test );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-pending', data.test );
   },
 
   'runner:pass' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-pass', data.test );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-pass', data.test );
   },
 
   'runner:fail' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-fail', data.test, data.err );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-fail', data.test, data.err );
   },
 
   'runner:test-end' ( data ) {
-    Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-test-end', data.test, data.stats );
+    Editor.Ipc.sendToPanel( 'tester', 'tester:runner-test-end', data.test, data.stats );
   },
 };
 
@@ -104,7 +104,7 @@ module.exports = {
 
       testProcess.on('close', () => {
         testProcess = null;
-        Editor.Ipc.sendToPanel( 'tester.panel', 'tester:runner-close' );
+        Editor.Ipc.sendToPanel( 'tester', 'tester:runner-close' );
       });
     },
 

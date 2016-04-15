@@ -102,7 +102,7 @@
   }
 
   //
-  Editor.registerPanel('tester.panel', {
+  Editor.polymerPanel('tester', {
     properties: {
       module: {
         value: 'packages',
@@ -217,7 +217,7 @@
 
     // TODO
     // 'tester:run-tests' ( pkgName ) {
-    //   Editor.Panel.focus('tester.panel');
+    //   Editor.Panel.focus('tester');
     // },
 
     reset () {
