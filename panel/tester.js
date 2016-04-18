@@ -394,44 +394,46 @@
     },
 
     // ipc
-    'tester:runner-start' () {
-      this._onRunnerStart();
-    },
+    messages: {
+      'tester:runner-start' () {
+        this._onRunnerStart();
+      },
 
-    'tester:runner-end' () {
-      this._onRunnerEnd();
-    },
+      'tester:runner-end' () {
+        this._onRunnerEnd();
+      },
 
-    'tester:runner-suite' ( event, suite ) {
-      this._onRunnerSuite(suite);
-    },
+      'tester:runner-suite' ( event, suite ) {
+        this._onRunnerSuite(suite);
+      },
 
-    'tester:runner-suite-end' ( event, suite ) {
-      this._onRunnerSuiteEnd(suite);
-    },
+      'tester:runner-suite-end' ( event, suite ) {
+        this._onRunnerSuiteEnd(suite);
+      },
 
-    'tester:runner-test' ( event, test ) {
-      this._onRunnerTest(test);
-    },
+      'tester:runner-test' ( event, test ) {
+        this._onRunnerTest(test);
+      },
 
-    'tester:runner-pending' ( event, test ) {
-      this._onRunnerPending(test);
-    },
+      'tester:runner-pending' ( event, test ) {
+        this._onRunnerPending(test);
+      },
 
-    'tester:runner-pass' ( event, test ) {
-      this._onRunnerPass(test);
-    },
+      'tester:runner-pass' ( event, test ) {
+        this._onRunnerPass(test);
+      },
 
-    'tester:runner-fail' ( event, test ) {
-      this._onRunnerFail(test);
-    },
+      'tester:runner-fail' ( event, test ) {
+        this._onRunnerFail(test);
+      },
 
-    'tester:runner-test-end' ( event, test, stats ) {
-      this._onRunnerTestEnd(test, stats);
-    },
+      'tester:runner-test-end' ( event, test, stats ) {
+        this._onRunnerTestEnd(test, stats);
+      },
 
-    'tester:runner-close' () {
-      this._onRunnerClose();
+      'tester:runner-close' () {
+        this._onRunnerClose();
+      },
     },
   });
 
