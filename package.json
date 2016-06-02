@@ -18,8 +18,8 @@
     "icon": "panel/icon.png",
     "width": 500,
     "height": 800,
-    "min-width": 340,
-    "min-height": 400,
+    "min-width": 200,
+    "min-height": 200,
     "shortcuts": {}
   }
 }

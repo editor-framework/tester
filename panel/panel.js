@@ -149,6 +149,7 @@ Editor.Panel.extend({
         debug: this.$.debug.value
       });
     });
+
     this.$.reload.addEventListener('confirm', () => {
       Editor.Ipc.sendToMain('tester:reload');
     });
