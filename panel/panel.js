@@ -57,19 +57,19 @@ Editor.Panel.extend({
     </div>
 
     <div class="layout horizontal end-justified">
-      <ui-button id="run" class="mini green">
+      <ui-button id="run" class="transparent green">
         <i class="icon-play"></i>
       </ui-button>
 
-      <ui-button id="reload" class="mini blue">
+      <ui-button id="reload" class="transparent blue">
         <i class="icon-cw"></i>
       </ui-button>
 
-      <ui-button id="close" class="mini red">
+      <ui-button id="close" class="transparent red">
         <i class="icon-cancel"></i>
       </ui-button>
 
-      <ui-button id="active" class="mini">
+      <ui-button id="active" class="transparent">
         <i class="icon-eye"></i>
       </ui-button>
     </div>
