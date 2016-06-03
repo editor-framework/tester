@@ -212,11 +212,14 @@ Editor.Panel.extend({
       path = Path.join( pkgPath, 'test' );
     }
 
-    Globby([
+    // DISABLE: disable async method because Fireball's globby not updated.
+    // Globby([
+    let files = Globby.sync([
       Path.join(path,'**/*.js'),
       '!'+Path.join(path,'**/*.skip.js'),
       '!**/fixtures/**',
-    ]).then(files => {
+    ]);
+    // ]).then(files => {
       files = files.map(file => {
         return Path.relative(path,file);
       });
@@ -228,7 +231,7 @@ Editor.Panel.extend({
       if ( cb ) {
         cb ();
       }
-    });
+    // });
   },
 
   _updateButtons () {
