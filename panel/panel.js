@@ -75,6 +75,19 @@ Editor.Panel.extend({
     </div>
   `,
 
+  $: {
+    module: '#module',
+    packages: '#packages',
+    file: '#file',
+    refreshFile: '#refreshFile',
+    mode: '#mode',
+    debug: '#debug',
+    run: '#run',
+    reload: '#reload',
+    active: '#active',
+    close: '#close',
+  },
+
   get running () { return this._running; },
   set running (val) {
     if ( this._running !== val ) {
@@ -85,19 +98,6 @@ Editor.Panel.extend({
 
   ready () {
     this._running = false;
-    this.$ = {
-      module: this.shadowRoot.querySelector('#module'),
-      packages: this.shadowRoot.querySelector('#packages'),
-      file: this.shadowRoot.querySelector('#file'),
-      refreshFile: this.shadowRoot.querySelector('#refreshFile'),
-      mode: this.shadowRoot.querySelector('#mode'),
-      debug: this.shadowRoot.querySelector('#debug'),
-      run: this.shadowRoot.querySelector('#run'),
-      reload: this.shadowRoot.querySelector('#reload'),
-      active: this.shadowRoot.querySelector('#active'),
-      close: this.shadowRoot.querySelector('#close'),
-    };
-
     this._initEvents();
 
     Async.series([
