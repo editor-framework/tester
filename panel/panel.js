@@ -23,8 +23,7 @@ Editor.Panel.extend({
   `,
 
   template: `
-    <div class="view flex-1">
-    </div>
+    <div class="view flex-1"></div>
 
     <div class="settings">
       <ui-prop name="Module">
@@ -118,20 +117,20 @@ Editor.Panel.extend({
   },
 
   _initEvents () {
-    this.$.module.addEventListener('confirm', event => {
+    this.$module.addEventListener('confirm', event => {
       if ( event.detail.value === 'package' ) {
-        this.$.packages.hidden = false;
+        this.$packages.hidden = false;
       } else {
-        this.$.packages.hidden = true;
+        this.$packages.hidden = true;
       }
       this._updateFiles();
     });
 
-    this.$.packages.addEventListener('confirm', () => {
+    this.$packages.addEventListener('confirm', () => {
       this._updateFiles();
     });
 
-    this.$.run.addEventListener('confirm', () => {
+    this.$run.addEventListener('confirm', () => {
       if ( this.running ) {
         return;
       }
@@ -142,27 +141,27 @@ Editor.Panel.extend({
       this.running = true;
 
       Editor.Ipc.sendToMain('tester:run', {
-        module: this.$.module.value,
-        package: this.$.packages.value,
-        file: this.$.file.value,
-        mode: this.$.mode.value,
-        debug: this.$.debug.value
+        module: this.$module.value,
+        package: this.$packages.value,
+        file: this.$file.value,
+        mode: this.$mode.value,
+        debug: this.$debug.value
       });
     });
 
-    this.$.reload.addEventListener('confirm', () => {
+    this.$reload.addEventListener('confirm', () => {
       Editor.Ipc.sendToMain('tester:reload');
     });
 
-    this.$.active.addEventListener('confirm', () => {
+    this.$active.addEventListener('confirm', () => {
       Editor.Ipc.sendToMain('tester:active-test-window');
     });
 
-    this.$.close.addEventListener('confirm', () => {
+    this.$close.addEventListener('confirm', () => {
       Editor.Ipc.sendToMain('tester:close');
     });
 
-    this.$.refreshFile.addEventListener('confirm', () => {
+    this.$refreshFile.addEventListener('confirm', () => {
       this._updateFiles();
     });
   },
@@ -183,7 +182,7 @@ Editor.Panel.extend({
         return a.text.localeCompare(b.text);
       });
 
-      let packagesEL = this.$.packages;
+      let packagesEL = this.$packages;
       packagesEL.clear();
 
       pkgInfos.forEach(info => {
@@ -198,8 +197,8 @@ Editor.Panel.extend({
 
   _updateFiles ( cb ) {
     let path;
-    let module = this.$.module.value;
-    let fileEL = this.$.file;
+    let module = this.$module.value;
+    let fileEL = this.$file;
 
     fileEL.clear();
 
@@ -208,7 +207,7 @@ Editor.Panel.extend({
     } else if ( module === 'app' ) {
       path = Editor.url('app://test');
     } else if ( module === 'package' ) {
-      let pkgPath = this.$.packages.value;
+      let pkgPath = this.$packages.value;
       path = Path.join( pkgPath, 'test' );
     }
 
@@ -235,9 +234,9 @@ Editor.Panel.extend({
   },
 
   _updateButtons () {
-    this.$.reload.disabled = !this._running;
-    this.$.active.disabled = !this._running;
-    this.$.close.disabled = !this._running;
+    this.$reload.disabled = !this._running;
+    this.$active.disabled = !this._running;
+    this.$close.disabled = !this._running;
   },
 
   // TODO
