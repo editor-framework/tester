@@ -167,7 +167,7 @@ Editor.Panel.extend({
   },
 
   _updatePackages ( cb ) {
-    Editor.Ipc.sendToMain('editor:package-query-infos', (err,infos) => {
+    Editor.Package.queryInfos((err,infos) => {
       let pkgInfos = infos.map(info => {
         return {
           value: info.path,
